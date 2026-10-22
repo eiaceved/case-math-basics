@@ -1,0 +1,1369 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.home-pill{font:600 12px var(--mono,-apple-system);padding:5px 11px;border-radius:999px;color:#fff;background:var(--accent,#0d6b61);text-decoration:none;white-space:nowrap;margin-right:12px}
+</style></head><body>
+<title>Case Math Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column (max 820px) under a sticky step rail. Every step runs the same loop:
+   interviewer prompt -> your move -> reveal a strong answer. Exhibits sit inside the column like workpapers. */
+:root{
+  --bg:#f2f5f6; --surface:#ffffff; --surface-2:#e8eef0; --fg:#13202a; --fg-2:#44525d; --muted:#6c7a84; --line:#d4dce0;
+  --accent:#0d6b61; --accent-ink:#0a5a51; --accent-soft:#dbeeea; --on-accent:#ffffff;
+  --s1:#2a78d6; --s2:#eb6834; --grid:#e2e8ea; --axis:#b6c1c7;
+  --good:#0ca30c; --good-ink:#006300; --crit:#d03b3b; --crit-ink:#ad2828;
+  --h1:#e6f0fc; --h2:#b7d3f6; --h3:#6da7ec; --h4:#2a78d6; --h5:#104281;
+  --dot:#eb6834; --dot-ink:#111111; --tip-bg:#13202a; --tip-fg:#ffffff;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1215; --surface:#151c20; --surface-2:#1b252a; --fg:#e5ecef; --fg-2:#a8b4bb; --muted:#7c8992; --line:#29343a;
+    --accent:#4cc2b1; --accent-ink:#72d4c6; --accent-soft:#11302c; --on-accent:#06201c;
+    --s1:#3987e5; --s2:#d95926; --grid:#222c32; --axis:#3a464d;
+    --good:#0ca30c; --good-ink:#3dc43d; --crit:#d03b3b; --crit-ink:#ff8484;
+    --h1:#1a2531; --h2:#1c3c63; --h3:#22599b; --h4:#3987e5; --h5:#86b6ef;
+    --dot:#f07a45; --dot-ink:#111111; --tip-bg:#e5ecef; --tip-fg:#0d1215;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1215; --surface:#151c20; --surface-2:#1b252a; --fg:#e5ecef; --fg-2:#a8b4bb; --muted:#7c8992; --line:#29343a;
+  --accent:#4cc2b1; --accent-ink:#72d4c6; --accent-soft:#11302c; --on-accent:#06201c;
+  --s1:#3987e5; --s2:#d95926; --grid:#222c32; --axis:#3a464d;
+  --good:#0ca30c; --good-ink:#3dc43d; --crit:#d03b3b; --crit-ink:#ff8484;
+  --h1:#1a2531; --h2:#1c3c63; --h3:#22599b; --h4:#3987e5; --h5:#86b6ef;
+  --dot:#f07a45; --dot-ink:#111111; --tip-bg:#e5ecef; --tip-fg:#0d1215;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:17px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--display);font-stretch:86%;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0 0 .8em}
+a{color:var(--accent-ink)}
+b,strong{font-weight:700}
+.eyebrow,.lbl,.who{font:500 11px/1.4 var(--mono);letter-spacing:.09em;text-transform:uppercase}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.tnum{font-variant-numeric:tabular-nums}
+
+/* rail */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.rail-in{max-width:820px;margin:0 auto;padding:8px 20px;display:flex;gap:10px;align-items:center}
+.chips{display:flex;gap:4px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none;padding-block:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips a{font:500 12px var(--mono);padding:5px 9px;border-radius:999px;color:var(--fg-2);white-space:nowrap;text-decoration:none}
+.chips a:hover{background:var(--surface-2)}
+.chips a.on{background:var(--fg);color:var(--bg)}
+.speed{display:flex;align-items:center;gap:6px;font:500 11px var(--mono);color:var(--muted);flex:none}
+.speed select{font:500 12px var(--mono);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:3px 4px}
+
+/* hero */
+.hero{padding-block:56px 40px}
+.hero .eyebrow{color:var(--accent-ink);margin-bottom:14px}
+.hero h1{font-size:clamp(40px,8vw,64px);line-height:1;font-weight:800;font-stretch:80%}
+.lede{font-size:21px;line-height:1.5;color:var(--fg-2);max-width:36em;margin-top:18px}
+.how{list-style:none;padding:0;margin:26px 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.how li{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;font-size:15px;line-height:1.4;counter-increment:how}
+.how li::before{content:counter(how);display:block;font:600 12px var(--mono);color:var(--accent-ink);margin-bottom:4px}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+/* steps */
+.step{padding-block:52px;border-top:1px solid var(--line);scroll-margin-top:56px}
+.sh{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.idx{font:600 13px var(--mono);color:var(--accent-ink)}
+.sh h2{font-size:clamp(26px,4.4vw,32px);line-height:1.15;font-weight:750}
+.sh .listen{margin-left:auto}
+.sub{color:var(--fg-2);margin-top:8px;max-width:40em}
+
+.btn{font:600 14px/1.2 var(--body);border-radius:8px;padding:9px 14px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{font-size:13px;padding:6px 10px}
+.btn[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn svg{width:14px;height:14px;fill:currentColor;flex:none}
+
+.iv{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px 22px;margin-top:22px}
+.who{color:var(--muted);margin-bottom:8px}
+.iv p{font-size:19px;line-height:1.55}
+.iv p:last-child{margin-bottom:0}
+
+.move{display:flex;gap:12px 16px;align-items:center;flex-wrap:wrap;margin-top:18px;padding-block:14px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+.move .lbl{color:var(--accent-ink);flex:none}
+.move p{margin:0;flex:1 1 260px;min-width:0;font-weight:600}
+.move .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+.ans{background:var(--accent-soft);border-radius:var(--r);padding:20px 22px;margin-top:14px}
+.ans .who{color:var(--accent-ink)}
+.ans h3{font-size:19px;margin:18px 0 8px;font-weight:700}
+.ans h3:first-of-type{margin-top:4px}
+.ans ul{margin:0 0 .6em;padding-left:1.2em}
+.ans li{margin-bottom:.35em}
+.script{font-size:18px;line-height:1.6}
+.script p{margin-bottom:.7em}
+.note{font-size:15px;color:var(--fg-2)}
+
+/* facts strip */
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.facts div{background:var(--surface);padding:12px 14px;min-width:0}
+.facts .k{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.facts .v{font:700 22px/1.2 var(--display);font-stretch:86%;margin-top:4px}
+.facts .d{font-size:13px;color:var(--fg-2);line-height:1.35;margin-top:2px}
+
+/* primer */
+.def{font:600 clamp(21px,3.4vw,26px)/1.35 var(--display);font-stretch:92%;margin-top:22px;max-width:30em}
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.panel h3{font-size:19px;font-weight:700}
+.panel .tag{font:500 11px var(--mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:2px 0 8px}
+.panel ul{margin:0;padding-left:1.1em;font-size:16px}
+.panel li{margin-bottom:.3em}
+.cycle{list-style:none;padding:0;margin:14px 0 0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px}
+.cycle li{position:relative;background:var(--surface-2);border-radius:8px;padding:12px 12px 10px;min-width:0}
+.cycle li b{display:block;font:700 17px var(--display);font-stretch:88%}
+.cycle li span{font-size:14px;color:var(--fg-2);line-height:1.35;display:block;margin-top:2px}
+.cycle li:not(:last-child)::after{content:"";position:absolute;right:-17px;top:50%;width:12px;height:12px;border-top:2px solid var(--muted);border-right:2px solid var(--muted);transform:translateY(-50%) rotate(45deg)}
+.cycle-note{font:500 12px var(--mono);color:var(--muted);margin-top:10px}
+.vocab{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+.term{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.term b{display:block;font:700 16px var(--display);font-stretch:90%;margin-bottom:3px}
+.term p{margin:0;font-size:15px;line-height:1.45;color:var(--fg-2)}
+.h-sec{font:500 11px var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:30px}
+
+/* qa list */
+.qa{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.qa li{background:var(--surface);border-radius:8px;padding:12px 14px}
+.qa .q{font-weight:700}
+.qa .a{color:var(--fg-2);margin-top:2px}
+.qa .a::before{content:"Interviewer: ";font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+
+/* framework tree */
+.tree{margin-top:6px}
+.root{background:var(--fg);color:var(--bg);border-radius:8px;padding:12px 16px;font:700 18px/1.3 var(--display);font-stretch:90%;text-align:center;position:relative}
+.root::after{content:"";position:absolute;left:50%;bottom:-16px;width:2px;height:16px;background:var(--muted)}
+.branches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px;padding-top:14px;border-top:2px solid var(--muted)}
+.branch{background:var(--surface);border-radius:8px;padding:12px 13px;min-width:0}
+.branch .n{font:600 12px var(--mono);color:var(--accent-ink)}
+.branch b{display:block;font:700 16px/1.25 var(--display);font-stretch:90%;margin:2px 0 6px}
+.branch ul{margin:0;padding-left:1.05em;font-size:14.5px;line-height:1.4}
+.branch li{margin-bottom:.3em}
+
+/* exhibits */
+.ex{margin:22px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 18px 14px}
+.ex-h{display:flex;justify-content:space-between;align-items:baseline;gap:6px 12px;flex-wrap:wrap}
+.ex-t{font:700 18px var(--display);font-stretch:88%}
+.ex-ref{font:500 12px var(--mono);color:var(--muted)}
+.ex-s{font-size:14px;color:var(--fg-2);margin-top:2px}
+.ex figcaption,.src{font:400 12px/1.45 var(--mono);color:var(--muted);margin-top:12px}
+.multiples{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.mini{border:1px solid var(--grid);border-radius:8px;padding:10px 10px 4px;min-width:0}
+.mini .nm{font-weight:700;font-size:14.5px;line-height:1.25;min-height:2.5em}
+.mini .ch{font:500 12px var(--mono);color:var(--fg-2)}
+.mini svg{display:block;width:100%;height:auto;margin-top:4px}
+.tblwrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:14.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--grid);white-space:nowrap}
+th{font:500 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+
+.hbar{margin-top:16px}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:4px 14px;align-items:center;padding-block:9px;border-bottom:1px solid var(--grid)}
+.hrow:last-of-type{border-bottom:0}
+.hlab b{display:block;font-size:15px;line-height:1.3}
+.hlab span{font-size:13px;color:var(--fg-2);line-height:1.3;display:block}
+.track{position:relative;height:26px}
+.bar{position:absolute;left:0;top:5px;height:16px;border-radius:0 4px 4px 0;background:var(--s1);min-width:2px}
+.bar.b2{background:var(--s2)}
+.bval{position:absolute;top:2px;font:600 13px var(--mono);color:var(--fg);white-space:nowrap;padding-left:6px}
+.tol{position:absolute;top:-4px;bottom:-4px;width:0;border-left:1.5px solid var(--fg-2)}
+.axis{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:14px}
+.ticks{position:relative;height:18px;font:500 11px var(--mono);color:var(--muted);border-top:1px solid var(--axis)}
+.ticks span{position:absolute;top:3px;transform:translateX(-50%)}
+.ticks span:first-child{transform:none}
+.ticks span:last-child{transform:translateX(-100%)}
+.status{font:600 12px var(--mono);display:inline-flex;gap:5px;align-items:center;margin-top:3px}
+.status.bad{color:var(--crit-ink)} .status.ok{color:var(--good-ink)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--fg-2);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.tolnote{font:500 12px var(--mono);color:var(--fg-2);margin-top:8px}
+
+/* given table + calc steps */
+.given{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-top:16px}
+.given div{background:var(--surface);padding:11px 13px;min-width:0}
+.given .k{font-size:13px;color:var(--fg-2);line-height:1.3}
+.given .v{font:700 20px/1.2 var(--display);font-stretch:88%;margin-top:3px}
+.calc{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.calc li{background:var(--surface);border-radius:8px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;align-items:center}
+.calc .t{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);grid-column:1/-1}
+.calc .f{font-size:16px;min-width:0}
+.calc .r{font:700 20px var(--display);font-stretch:88%;text-align:right;white-space:nowrap}
+.stepper .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chipset{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chipset span{font:500 12px var(--mono);background:var(--surface);border-radius:6px;padding:4px 8px;color:var(--fg-2)}
+.chipset b{color:var(--fg)}
+
+/* heat map */
+.heat{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px;align-items:start;margin-top:12px}
+.heat svg{width:100%;height:auto;display:block}
+.heat svg text{font-family:var(--mono)}
+.reg{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.reg li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14.5px;line-height:1.3;padding-block:6px;border-bottom:1px solid var(--grid)}
+.reg .id{width:28px;height:28px;border-radius:50%;background:var(--dot);color:var(--dot-ink);font:600 11px var(--mono);display:grid;place-items:center}
+.reg .sc{font:600 13px var(--mono);color:var(--fg-2);text-align:right;white-space:nowrap}
+.ramp{display:flex;align-items:center;gap:6px;font:500 11px var(--mono);color:var(--muted);margin-top:10px}
+.ramp i{width:22px;height:10px;display:inline-block;border-radius:2px}
+
+/* roadmap */
+.road{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.phase{background:var(--surface);border-radius:8px;padding:12px 14px;min-width:0}
+.phase .d{font:600 12px var(--mono);color:var(--accent-ink)}
+.phase b{display:block;font:700 18px var(--display);font-stretch:88%;margin:2px 0 6px}
+.phase ul{margin:0;padding-left:1.05em;font-size:15px;line-height:1.4}
+.phase li{margin-bottom:.35em}
+.struct{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}
+.struct span{font:600 12px var(--mono);padding:4px 9px;border-radius:999px;background:var(--surface);color:var(--fg)}
+
+/* drivers */
+.drivers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:6px}
+.drivers div{background:var(--surface);border-radius:8px;padding:11px 13px;min-width:0}
+.drivers b{display:block;font:700 16px var(--display);font-stretch:90%}
+.drivers p{margin:2px 0 0;font-size:15px;color:var(--fg-2);line-height:1.45}
+.eq{font:600 15px var(--mono);background:var(--surface);border-radius:8px;padding:10px 14px;margin:6px 0 12px;overflow-x:auto}
+.drill{margin-top:34px}
+.drill h3{font-size:22px;font-weight:750}
+
+/* multiple choice */
+.mc{margin-top:20px}
+.mc-head{display:flex;gap:10px;align-items:flex-start}
+.stem{font-weight:700;font-size:18px;line-height:1.45;margin:0 0 10px;flex:1;min-width:0}
+.opts{display:grid;gap:8px}
+.opt{text-align:left;display:flex;gap:10px;align-items:flex-start;padding:11px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit;font-size:16px;line-height:1.45;cursor:pointer;width:100%}
+.opt:hover:not([disabled]){border-color:var(--muted)}
+.opt[disabled]{cursor:default}
+.opt .L{font:600 13px/1.6 var(--mono);color:var(--muted);flex:none}
+.opt .x{flex:1;min-width:0}
+.opt .tag{font:600 12px/1.7 var(--mono);white-space:nowrap;flex:none}
+.opt.right{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--surface))}
+.opt.right .tag{color:var(--good-ink)}
+.opt.wrong{border-color:var(--crit);background:color-mix(in srgb,var(--crit) 9%,var(--surface))}
+.opt.wrong .tag{color:var(--crit-ink)}
+.why{margin-top:10px;padding:13px 16px;border-radius:8px;background:var(--surface-2);font-size:16px}
+.why p:last-child{margin-bottom:0}
+.test .mc{border-top:1px solid var(--line);padding-top:20px;margin-top:22px}
+.test .mc:first-of-type{border-top:0;padding-top:0}
+.qn{font:600 13px var(--mono);color:var(--accent-ink);display:block;margin-bottom:2px}
+.scorebar{position:sticky;top:calc(env(safe-area-inset-top,0px) + 50px);z-index:5;display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--bg);padding-block:10px;margin-top:14px;border-bottom:1px solid var(--line)}
+.score{font:700 22px var(--display);font-stretch:86%}
+.score small{font:500 12px var(--mono);color:var(--muted);margin-left:6px}
+.done{background:var(--accent-soft);border-radius:var(--r);padding:16px 18px;margin-top:24px}
+
+footer{padding-block:40px 64px;border-top:1px solid var(--line);font-size:14px;color:var(--fg-2)}
+
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--tip-bg);color:var(--tip-fg);font:500 12px/1.4 var(--mono);padding:6px 9px;border-radius:6px;max-width:260px;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+
+@media (max-width:760px){
+  .branches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .heat{grid-template-columns:minmax(0,1fr)}
+  .road{grid-template-columns:minmax(0,1fr)}
+  .multiples{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .how{grid-template-columns:minmax(0,1fr)}
+  .split,.vocab,.drivers{grid-template-columns:minmax(0,1fr)}
+  .cycle{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cycle li:nth-child(2)::after{display:none}
+  .given{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hrow,.axis{grid-template-columns:minmax(0,1fr)}
+  .axis>div:first-child{display:none}
+  .iv p{font-size:18px}
+  .speed span{display:none}
+}
+@media (max-width:420px){
+  .branches{grid-template-columns:minmax(0,1fr)}
+}
+@media (prefers-reduced-motion:no-preference){
+  .ans:not([hidden]),.why:not([hidden]),.calc li:not([hidden]){animation:rise .28s ease-out}
+  @keyframes rise{from{transform:translateY(4px);opacity:.4}to{transform:none;opacity:1}}
+  html{scroll-behavior:smooth}
+}
+[hidden]:not([hidden=until-found i]){display:none!important}
+/* scoring register */
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+.scorer li{grid-template-columns:auto minmax(0,1fr) auto}
+.scorer .nm{min-width:0}
+.pick{display:flex;gap:6px;align-items:center}
+.pick select{font:500 13px var(--mono);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:4px 4px;min-width:44px}
+.pick .sc{min-width:34px}
+.reg .w{display:block;font-size:13px;color:var(--fg-2);margin-top:2px;line-height:1.35}
+.reg .nm b{font-weight:600}
+.mytop{font:600 15px/1.4 var(--body);margin:12px 0 0;color:var(--fg)}
+.mapnote{font:500 12px var(--mono);color:var(--fg-2);margin:8px 0 0}
+.bar.b3{background:var(--fg-2)}
+/* voice menu */
+.vhint{flex-basis:100%;margin:0;font-size:14px;line-height:1.45;color:var(--fg-2)}
+@media (max-width:600px){.given>div:last-child:nth-child(odd){grid-column:1/-1}}
+@media (max-width:420px){
+  .scorer li{grid-template-columns:auto minmax(0,1fr)}
+  .scorer .pick{grid-column:2}
+}
+</style>
+<style>
+/* calculators */
+.calcbox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-top:22px}
+.calcbox h3{font-size:19px;font-weight:700;margin:0 0 4px}
+.calcbox .sub{margin-top:2px;font-size:15px}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 14px;margin-top:12px}
+.cgrid label{display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.3;color:var(--fg-2);min-width:0}
+.cgrid input{font:500 15px var(--mono);background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:7px 8px;width:100%;min-width:0}
+.cout{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.cout div{background:var(--surface-2);border-radius:8px;padding:10px 12px;min-width:0}
+.cout .k{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cout .v{font:700 22px/1.2 var(--display);font-stretch:86%;margin-top:3px}
+.cnote{font-size:15px;line-height:1.5;color:var(--fg-2);margin:12px 0 0}
+.cbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.gb{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.gb .ans{margin-top:0}
+@media (max-width:600px){.gb{grid-template-columns:minmax(0,1fr)}}
+.reps{display:grid;gap:12px;margin-top:14px}
+.rep{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.rep .rq{font-weight:700;font-size:17px;margin:0 0 8px}
+.rep .acts{display:flex;gap:8px;flex-wrap:wrap}
+.rep .ans{margin-top:12px}
+.tw th,.tw td{white-space:normal}
+@media (max-width:600px){.tw th,.tw td{padding:6px 5px;font-size:13.5px}.tw th{font-size:10px}}
+</style>
+
+<nav class="rail" aria-label="Topics">
+  <div class="rail-in">
+    <a class="home-pill" href="/">All cases</a>
+    <div class="chips" id="chips">
+      <a href="#habits">Habits</a><a href="#big">Big numbers</a><a href="#pct">Percents</a><a href="#growth">Growth</a><a href="#profit">Profit</a><a href="#breakeven">Break-even</a><a href="#prob">Probability</a><a href="#value">Valuation</a><a href="#sizing">Sizing</a><a href="#avg">Averages</a><a href="#cheat">Cheat sheet</a><a href="#test">Test</a>
+    </div>
+    <label class="speed" for="rate"><span>Speed</span>
+      <select id="rate" aria-label="Read-aloud speed">
+        <option value="0.9">0.9×</option><option value="1" selected>1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option>
+      </select>
+    </label>
+  </div>
+</nav>
+
+<main>
+<header class="hero wrap">
+  <p class="eyebrow">Case interview math · practice page · about 45 minutes</p>
+  <h1>Case Math Basics</h1>
+  <p class="lede" data-say>Every kind of math that shows up in consulting and advisory cases, one topic at a time: big numbers, percentages, growth, profit, break-even, probability, valuation, market sizing, and averages. Each topic has the rules, a worked example, common traps, and practice reps.</p>
+  <ol class="how">
+    <li><b>Read the rules</b> for a topic, or press Listen.</li>
+    <li><b>Try the worked example</b> out loud before revealing each step.</li>
+    <li><b>Do the reps</b>, then take the 16-question test at the end.</li>
+  </ol>
+  <div class="hero-actions">
+    <a class="btn primary" href="#habits">Start with the habits</a>
+    <a class="btn" href="#breakeven">Jump to break-even</a>
+    <a class="btn" href="#cheat">Formula cheat sheet</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- 01 HABITS -->
+<section class="step" id="habits">
+  <div class="sh"><span class="idx">01</span><h2>How to do math out loud</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="def" data-say>Case math is rarely hard. Interviewers are grading whether you set it up clearly, keep track of units, and say what the answer means for the client.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>1. Say the formula first</b><p>"Break-even units equals fixed costs divided by the profit on each unit." Then plug in numbers. If you slip on the arithmetic, the interviewer can still see you know the method.</p></div>
+    <div class="term" data-say><b>2. Write units on every line</b><p>Dollars or millions, per month or per year, per customer or in total. Most case math mistakes are unit mistakes, not arithmetic.</p></div>
+    <div class="term" data-say><b>3. Round on purpose, and say so</b><p>"I'll call 48 about 50 to keep it clean." Interviewers expect rounding. They just want to hear it.</p></div>
+    <div class="term" data-say><b>4. One step at a time</b><p>Multiply two numbers, write the result, then the next. Long chains in your head are where zeros go missing.</p></div>
+    <div class="term" data-say><b>5. Sanity-check</b><p>Does the answer make sense against something you know? 560 coffees a day is one a minute for ten hours. Is that realistic?</p></div>
+    <div class="term" data-say><b>6. Say the so-what</b><p>Never stop at a number. "That's 3 percent of the market, which looks achievable." The so-what is what gets you credit.</p></div>
+  </div>
+  <p class="note" style="margin-top:14px" data-say>If you need a moment, ask for it: "Can I take 30 seconds to set this up?" That's normal and looks better than rushing.</p>
+</section>
+
+<!-- 02 BIG NUMBERS -->
+<section class="step" id="big">
+  <div class="sh"><span class="idx">02</span><h2>Big numbers and mental math</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Cases are full of millions and billions. The trick is to separate the front numbers from the zeros.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Count the zeros</b><p>Thousand has 3 zeros (K), million 6 (M), billion 9 (B). To multiply, multiply the front numbers and add the zeros. To divide, divide the front numbers and subtract the zeros.</p></div>
+    <div class="term" data-say><b>Friendly multipliers</b><p>Times 5 is times 10, then half. Times 25 is times 100, then divide by 4. Divide by 5 is times 2, then divide by 10.</p></div>
+    <div class="term" data-say><b>Break it apart</b><p>37 times 8 is 30 times 8, plus 7 times 8. That's 240 plus 56, or 296.</p></div>
+    <div class="term" data-say><b>Round, then adjust</b><p>48 times 21 is about 50 times 20, or 1,000. The exact answer is 1,008, close enough for a case.</p></div>
+  </div>
+  <div class="eq">3M × 40K → 3 × 40 = 120, zeros 6 + 3 = 9 → 120B</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A country has 330 million people. 4 percent buy our product each year, spending 250 dollars each. How big is the market?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Find 1 percent first, then scale. Turn times 250 into something friendlier.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="60">60s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. 1 percent of 330 million is 3.3 million. Just move the decimal two places."><span class="t">1 · Find 1%</span><span class="f">1% of 330M</span><span class="r tnum">3.3M</span></li>
+      <li class="st" hidden data-say="Step 2. 4 percent is 4 times that: 13.2 million buyers."><span class="t">2 · Scale to 4%</span><span class="f">3.3M × 4</span><span class="r tnum">13.2M</span></li>
+      <li class="st" hidden data-say="Step 3. Times 250 is times 1,000, then divide by 4. 13.2 million times 1,000 is 13.2 billion. Divided by 4 is 3.3 billion dollars."><span class="t">3 · Times $250</span><span class="f">× 1,000 = $13.2B, then ÷ 4</span><span class="r tnum">$3.3B</span></li>
+      <li class="st" hidden data-say="Step 4. Sanity check. 3.3 billion divided by 330 million people is 10 dollars per person a year. That's plausible."><span class="t">4 · Sanity check</span><span class="f">$3.3B ÷ 330M people = $10 each a year</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 4</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Losing a zero. Write the unit, like M or B, on every line.</li>
+      <li>Mixing per month and per year. Convert everything to one before you multiply.</li>
+      <li>Saying "13.2 million" when you mean billion. Read your answer back once.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="1">
+    <div class="mc-head"><p class="stem" data-say>Quick check: 2.5 million times 400 is…</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>100 million</button>
+      <button class="opt" type="button" data-say>1 billion</button>
+      <button class="opt" type="button" data-say>10 billion</button>
+      <button class="opt" type="button" data-say>10 million</button>
+    </div>
+    <div class="why" hidden><p data-say>2.5 times 4 is 10. Zeros: 6 from million plus 2 from 400 is 8. 10 with 8 more zeros is 1,000,000,000, or 1 billion.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. 45 thousand times 3,000?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-big-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-big-1" hidden><div class="script"><p data-say>"135 million. 45 times 3 is 135, and 3 plus 3 is 6 zeros."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. 7.2 billion divided by 900?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-big-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-big-2" hidden><div class="script"><p data-say>"8 million. Think of it as 7,200 million divided by 900, which is 8 million."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. 16 times 25?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-big-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-big-3" hidden><div class="script"><p data-say>"400. 16 times 100 is 1,600, divided by 4."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. 18 percent of 450?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-big-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-big-4" hidden><div class="script"><p data-say>"81. 10 percent is 45, 5 percent is 22.5, 3 percent is 13.5. 45 plus 22.5 plus 13.5 is 81."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 03 PERCENTAGES -->
+<section class="step" id="pct">
+  <div class="sh"><span class="idx">03</span><h2>Percentages</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>The most common case math, and the easiest to trip on. Almost every mistake comes from dividing by the wrong number.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Percent of</b><p>X percent of Y is X divided by 100, times Y. Flip trick: 8 percent of 50 is the same as 50 percent of 8, which is 4.</p></div>
+    <div class="term" data-say><b>Percent change</b><p>New minus old, divided by old. Always divide by the starting number.</p></div>
+    <div class="term" data-say><b>Points vs. percent</b><p>A margin going from 20 to 25 percent is up 5 percentage points, but that's a 25 percent increase. Say which one you mean.</p></div>
+    <div class="term" data-say><b>Going backward</b><p>If 120 dollars is the price after a 20 percent increase, the original is 120 divided by 1.2, or 100. Not 120 minus 20 percent.</p></div>
+    <div class="term" data-say><b>Changes stack, they don't add</b><p>Up 10 percent, then down 10 percent, is 1.1 times 0.9, or 0.99. That's a 1 percent drop, not zero.</p></div>
+    <div class="term" data-say><b>Share</b><p>Part divided by whole. 30 out of 200 customers is 15 percent. Market share works the same way.</p></div>
+  </div>
+  <div class="eq">% change = (new − old) ÷ old</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>Revenue grew from 80 million to 100 million, and the profit margin went from 10 percent to 12 percent. How much did profit grow?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Work out profit before and after, then the percent change. Don't just add the two growth rates.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="90">90s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Revenue growth. 100 minus 80 is 20. 20 divided by 80 is 25 percent."><span class="t">1 · Revenue growth</span><span class="f">(100 − 80) ÷ 80</span><span class="r tnum">25%</span></li>
+      <li class="st" hidden data-say="Step 2. Old profit. 80 million times 10 percent is 8 million."><span class="t">2 · Old profit</span><span class="f">$80M × 10%</span><span class="r tnum">$8M</span></li>
+      <li class="st" hidden data-say="Step 3. New profit. 100 million times 12 percent is 12 million."><span class="t">3 · New profit</span><span class="f">$100M × 12%</span><span class="r tnum">$12M</span></li>
+      <li class="st" hidden data-say="Step 4. Profit growth. 12 minus 8 is 4. 4 divided by 8 is 50 percent."><span class="t">4 · Profit growth</span><span class="f">(12 − 8) ÷ 8</span><span class="r tnum">50%</span></li>
+      <li class="st" hidden data-say="Step 5. The margin went up 2 percentage points, which is a 20 percent increase, because 2 is a fifth of 10."><span class="t">5 · Margin change</span><span class="f">10% → 12%: +2 points, or +20%</span><span class="r tnum">+2 pts</span></li>
+      <li class="st" hidden data-say="Step 6. So what. Profit grew twice as fast as revenue, because the company sold more and kept more of each dollar."><span class="t">6 · So what</span><span class="f">Profit grew 2× as fast as revenue</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 6</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="calcbox">
+    <h3>Percent change calculator</h3>
+    <p class="sub">Try 250 to 200, then 200 to 250. Notice the two percentages aren't the same.</p>
+    <div class="cgrid">
+      <label for="pc-old">Old value<input id="pc-old" type="number" step="1" value="250"></label>
+      <label for="pc-new">New value<input id="pc-new" type="number" step="1" value="200"></label>
+    </div>
+    <div class="cout">
+      <div><div class="k">Change</div><div class="v" id="pc-chg">–</div></div>
+      <div><div class="k">Percent change</div><div class="v" id="pc-pct">–</div></div>
+      <div><div class="k">Needed to get back</div><div class="v" id="pc-back">–</div></div>
+    </div>
+    <div class="cbtns"><button class="btn small" type="button" id="pc-reset">Reset</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Dividing by the new number instead of the old one.</li>
+      <li>Undoing a percent by subtracting the same percent. A 20 percent drop needs a 25 percent rise to recover.</li>
+      <li>Saying "percent" when you mean "percentage points."</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="1">
+    <div class="mc-head"><p class="stem" data-say>Quick check: a price rises 25 percent to 50 dollars. What was it before?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>37.50 dollars</button>
+      <button class="opt" type="button" data-say>40 dollars</button>
+      <button class="opt" type="button" data-say>42.50 dollars</button>
+      <button class="opt" type="button" data-say>45 dollars</button>
+    </div>
+    <div class="why" hidden><p data-say>50 divided by 1.25 is 40. Check: 40 plus 25 percent of 40, which is 10, is 50. Subtracting 25 percent of 50 gives 37.50, which is the trap.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. 15 percent of 240?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pct-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pct-1" hidden><div class="script"><p data-say>"36. 10 percent is 24, and 5 percent is half that, 12."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. Sales fell from 250 to 200. What's the percent change, and what increase gets back to 250?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pct-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pct-2" hidden><div class="script"><p data-say>"Down 20 percent, because 50 is a fifth of 250. Getting back needs up 25 percent, because 50 is a quarter of 200."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. Market share goes from 8 to 10 percent. How much is that?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pct-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pct-3" hidden><div class="script"><p data-say>"Up 2 percentage points, which is a 25 percent increase in share."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. A stock falls 50 percent, then rises 50 percent. Where does it end up?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pct-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pct-4" hidden><div class="script"><p data-say>"Down 25 percent. 0.5 times 1.5 is 0.75. 100 dollars falls to 50, then rises 25 to 75."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 04 GROWTH -->
+<section class="step" id="growth">
+  <div class="sh"><span class="idx">04</span><h2>Growth and compounding</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Growth builds on itself. Each year grows from the year before, not from the starting point.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Compounding</b><p>Value after some years equals start times one plus the growth rate, once for each year. 10 percent for two years is 1.1 times 1.1, or 1.21, up 21 percent.</p></div>
+    <div class="term" data-say><b>Rule of 72</b><p>Years to double is about 72 divided by the growth rate. At 8 percent a year, something doubles in about 9 years.</p></div>
+    <div class="term" data-say><b>Average yearly growth (CAGR)</b><p>The steady yearly rate that gets you from start to end. In an interview, estimate it: guess a rate, compound it, and adjust.</p></div>
+    <div class="term" data-say><b>Don't just divide</b><p>Going from 100 to 150 over 5 years isn't 10 percent a year. It's about 8.4 percent, because each year's growth builds on the last.</p></div>
+  </div>
+  <div class="eq">Future value = start × (1 + growth)^years · Years to double ≈ 72 ÷ growth %</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A 200 million dollar market grows 10 percent a year. How big will it be in three years?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Grow it one year at a time. Then sanity-check with the rule of 72.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="60">60s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Year 1. 200 times 1.1 is 220."><span class="t">Year 1</span><span class="f">$200M × 1.1</span><span class="r tnum">$220M</span></li>
+      <li class="st" hidden data-say="Year 2. 220 times 1.1 is 242."><span class="t">Year 2</span><span class="f">$220M × 1.1</span><span class="r tnum">$242M</span></li>
+      <li class="st" hidden data-say="Year 3. 242 times 1.1 is 266.2, about 266 million."><span class="t">Year 3</span><span class="f">$242M × 1.1</span><span class="r tnum">≈$266M</span></li>
+      <li class="st" hidden data-say="Compare. Adding 20 million a year would give 260. Compounding adds about 6 million more, because each year grows on a bigger base."><span class="t">Compare</span><span class="f">Simple: 200 + 3 × 20 = 260. Compounding adds ≈$6M</span><span class="r tnum">+$6M</span></li>
+      <li class="st" hidden data-say="Sanity check. 72 divided by 10 is about 7 years to double. Up about a third in 3 years fits."><span class="t">Rule of 72 check</span><span class="f">72 ÷ 10 ≈ 7 years to double; +33% in 3 years fits</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 5</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <figure class="ex">
+    <div class="ex-h"><span class="ex-t">The $200M market, growing 10% a year</span><span class="ex-ref">$ millions</span></div>
+    <div class="hbar" id="gro"></div>
+    <figcaption>Each year adds a little more than the last: $20M, then $22M, then $24M.</figcaption>
+  </figure>
+  <div class="calcbox">
+    <h3>Growth calculator</h3>
+    <p class="sub">Try 35% for 2 years, like a fast-growing brand.</p>
+    <div class="cgrid">
+      <label for="gr-start">Starting value<input id="gr-start" type="number" min="0" step="10" value="200"></label>
+      <label for="gr-rate">Growth a year (%)<input id="gr-rate" type="number" step="1" value="10"></label>
+      <label for="gr-years">Years<input id="gr-years" type="number" min="0" max="50" step="1" value="3"></label>
+    </div>
+    <div class="cout">
+      <div><div class="k">Ending value</div><div class="v" id="gr-end">–</div></div>
+      <div><div class="k">Total growth</div><div class="v" id="gr-total">–</div></div>
+      <div><div class="k">Years to double</div><div class="v" id="gr-double">–</div></div>
+    </div>
+    <div class="cbtns"><button class="btn small" type="button" id="gr-reset">Reset</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Adding yearly growth rates instead of compounding them.</li>
+      <li>Dividing total growth by years to get the yearly rate. It overstates it.</li>
+      <li>Forgetting a drop needs a bigger rise to recover.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="1">
+    <div class="mc-head"><p class="stem" data-say>Quick check: revenue doubles in 6 years. About what yearly growth is that?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>About 6 percent</button>
+      <button class="opt" type="button" data-say>About 12 percent</button>
+      <button class="opt" type="button" data-say>About 17 percent</button>
+      <button class="opt" type="button" data-say>About 20 percent</button>
+    </div>
+    <div class="why" hidden><p data-say>Rule of 72: 72 divided by 6 is 12 percent. Simply dividing 100 percent by 6 years gives about 17, which overstates it.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. 50 million growing 20 percent a year for 2 years?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-gro-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-gro-1" hidden><div class="script"><p data-say>"72 million. 50 times 1.2 is 60, and 60 times 1.2 is 72."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. Costs grow 6 percent a year. About how long until they double?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-gro-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-gro-2" hidden><div class="script"><p data-say>"About 12 years. 72 divided by 6."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. Sales went from 100 to 121 in 2 years. What's the yearly growth?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-gro-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-gro-3" hidden><div class="script"><p data-say>"10 percent a year. 1.1 times 1.1 is 1.21."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. A market grows 3 percent a year for 10 years. Roughly how much bigger is it?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-gro-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-gro-4" hidden><div class="script"><p data-say>"About a third bigger. It would take 24 years to double, so 10 years gets less than halfway. The exact answer is about 34 percent."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 05 PROFIT -->
+<section class="step" id="profit">
+  <div class="sh"><span class="idx">05</span><h2>Profit, costs, and margins</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>The profit tree is the backbone of most cases. Profit is revenue minus costs, and each side breaks down further.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Revenue</b><p>Price times quantity. Or number of customers times what each spends.</p></div>
+    <div class="term" data-say><b>Fixed vs. variable costs</b><p>Fixed costs don't change with volume, like rent and salaried staff. Variable costs rise with each unit, like ingredients and packaging.</p></div>
+    <div class="term" data-say><b>Margin</b><p>Profit divided by revenue. A 15 percent margin means 15 cents of profit on every dollar of sales.</p></div>
+    <div class="term" data-say><b>Contribution per unit</b><p>Price minus variable cost per unit. What each sale adds toward covering fixed costs.</p></div>
+    <div class="term" data-say><b>Margin vs. markup</b><p>Cost 60, price 100. Margin is 40 divided by the price, 40 percent. Markup is 40 divided by the cost, about 67 percent.</p></div>
+    <div class="term" data-say><b>EBITDA</b><p>Profit from operations, before interest, taxes, depreciation, and amortization. The profit number deals are priced on.</p></div>
+  </div>
+  <div class="eq">Profit = price × units − (fixed costs + variable cost × units)</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A coffee shop sells 400 cups a day, 360 days a year, at 4 dollars a cup. Each cup costs 1.50 dollars to make, and fixed costs are 250 thousand dollars a year. What's the profit and margin?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Get yearly volume first. Then revenue, variable costs, and fixed costs, in that order.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="90">90s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Cups a year. 400 times 360 is 144 thousand."><span class="t">1 · Cups a year</span><span class="f">400 × 360</span><span class="r tnum">144,000</span></li>
+      <li class="st" hidden data-say="Step 2. Revenue. 144 thousand times 4 dollars is 576 thousand."><span class="t">2 · Revenue</span><span class="f">144,000 × $4</span><span class="r tnum">$576K</span></li>
+      <li class="st" hidden data-say="Step 3. Variable costs. 144 thousand times 1.50 is 216 thousand."><span class="t">3 · Variable costs</span><span class="f">144,000 × $1.50</span><span class="r tnum">$216K</span></li>
+      <li class="st" hidden data-say="Step 4. Contribution. 576 minus 216 is 360 thousand, or 2.50 dollars a cup."><span class="t">4 · Contribution</span><span class="f">$576K − $216K ($2.50 a cup)</span><span class="r tnum">$360K</span></li>
+      <li class="st" hidden data-say="Step 5. Profit. 360 thousand minus 250 thousand in fixed costs is 110 thousand."><span class="t">5 · Profit</span><span class="f">$360K − $250K fixed</span><span class="r tnum">$110K</span></li>
+      <li class="st" hidden data-say="Step 6. Margin. 110 divided by 576 is about 19 percent."><span class="t">6 · Margin</span><span class="f">$110K ÷ $576K</span><span class="r tnum">≈19%</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 6</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Mixing up margin and markup. Margin divides by price; markup divides by cost.</li>
+      <li>Scaling fixed costs with volume. They stay put.</li>
+      <li>Mixing per-unit and total numbers in the same line.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="0">
+    <div class="mc-head"><p class="stem" data-say>Quick check: a product costs 30 dollars and sells for 50. What's the margin?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>40 percent</button>
+      <button class="opt" type="button" data-say>60 percent</button>
+      <button class="opt" type="button" data-say>67 percent</button>
+      <button class="opt" type="button" data-say>20 percent</button>
+    </div>
+    <div class="why" hidden><p data-say>Profit is 20. 20 divided by the 50 dollar price is 40 percent. 20 divided by the 30 dollar cost is the markup, about 67 percent.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. Revenue is 80 million at a 15 percent margin. What's the profit?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pro-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pro-1" hidden><div class="script"><p data-say>"12 million. 10 percent is 8, 5 percent is 4."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. Price 25 dollars, variable cost 10, sell 4,000 units, fixed costs 40 thousand. Profit?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pro-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pro-2" hidden><div class="script"><p data-say>"20 thousand. Each unit contributes 15 dollars. 15 times 4,000 is 60 thousand, minus 40 thousand fixed."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. A product costs 75 dollars. What price gives a 25 percent margin?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pro-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pro-3" hidden><div class="script"><p data-say>"100 dollars. Cost must be 75 percent of price, so 75 divided by 0.75. Adding 25 percent to the cost gives 93.75, which is a markup, not a margin."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. Revenue and every cost both rise 10 percent. What happens to profit and margin?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pro-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pro-4" hidden><div class="script"><p data-say>"Profit rises 10 percent too, but the margin stays the same, because profit and revenue grew at the same rate."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 06 BREAK-EVEN -->
+<section class="step" id="breakeven">
+  <div class="sh"><span class="idx">06</span><h2>Break-even and payback</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Break-even asks how much you need to sell to cover your costs. Payback asks how long it takes to earn back an up-front investment.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Break-even units</b><p>Fixed costs divided by contribution per unit. Each sale chips in its contribution until fixed costs are covered.</p></div>
+    <div class="term" data-say><b>With a profit target</b><p>Fixed costs plus the target profit, divided by contribution per unit.</p></div>
+    <div class="term" data-say><b>Break-even price</b><p>For a set volume: variable cost per unit, plus fixed costs divided by units.</p></div>
+    <div class="term" data-say><b>Payback period</b><p>Up-front cost divided by yearly profit, or yearly savings. A 500 thousand dollar machine that saves 125 thousand a year pays back in 4 years.</p></div>
+    <div class="term" data-say><b>Reality check 1: per day</b><p>Turn yearly break-even into a daily number. 200 thousand cups a year is about 550 a day. Can one shop do that?</p></div>
+    <div class="term" data-say><b>Reality check 2: share of market</b><p>Divide break-even by the market size. Needing 3 percent sounds doable; needing 40 percent doesn't.</p></div>
+  </div>
+  <div class="eq">Break-even units = fixed costs ÷ (price − variable cost per unit)</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A new gym charges 50 dollars a month. Each member costs 10 dollars a month to serve, and fixed costs are 60 thousand a month. The town has 40 thousand adults. How many members to break even, and how long to pay back a 1.2 million dollar build if it reaches 2,000 members?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Say the formula first. Keep everything monthly until the last step.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="120">2 min timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Contribution. 50 minus 10 is 40 dollars per member per month."><span class="t">1 · Contribution</span><span class="f">$50 − $10 a member a month</span><span class="r tnum">$40</span></li>
+      <li class="st" hidden data-say="Step 2. Break-even. 60 thousand divided by 40 is 1,500 members."><span class="t">2 · Break-even members</span><span class="f">$60,000 ÷ $40</span><span class="r tnum">1,500</span></li>
+      <li class="st" hidden data-say="Step 3. Share of the town. 1,500 out of 40 thousand adults is 3.75 percent."><span class="t">3 · Share of adults</span><span class="f">1,500 ÷ 40,000</span><span class="r tnum">3.75%</span></li>
+      <li class="st" hidden data-say="Step 4. Profit at 2,000 members. 2,000 times 40 is 80 thousand, minus 60 thousand fixed, is 20 thousand a month."><span class="t">4 · Profit at 2,000 members</span><span class="f">2,000 × $40 − $60,000</span><span class="r tnum">$20K/mo</span></li>
+      <li class="st" hidden data-say="Step 5. Payback. 1.2 million divided by 20 thousand is 60 months, or 5 years."><span class="t">5 · Payback</span><span class="f">$1.2M ÷ $20K a month = 60 months</span><span class="r tnum">5 years</span></li>
+      <li class="st" hidden data-say="Step 6. So what. Break-even looks reachable, under 4 percent of adults. But payback takes 5 years, so the owner needs to be in it for the long run."><span class="t">6 · So what</span><span class="f">Reachable break-even, slow payback</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 6</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <figure class="ex">
+    <div class="ex-h"><span class="ex-t">Members needed to break even, by monthly price</span><span class="ex-ref">$10 variable cost, $60K fixed a month</span></div>
+    <div class="hbar" id="bep"></div>
+    <figcaption>A small price change moves break-even a lot, because it changes the contribution from every member.</figcaption>
+  </figure>
+  <div class="calcbox">
+    <h3>Break-even calculator</h3>
+    <p class="sub">Starts with the gym. Use the same time period for every cost.</p>
+    <div class="cgrid">
+      <label for="be-price">Price per unit<input id="be-price" type="number" min="0" step="1" value="50"></label>
+      <label for="be-var">Variable cost per unit<input id="be-var" type="number" min="0" step="1" value="10"></label>
+      <label for="be-fixed">Fixed costs<input id="be-fixed" type="number" min="0" step="1000" value="60000"></label>
+      <label for="be-target">Target profit<input id="be-target" type="number" min="0" step="1000" value="0"></label>
+      <label for="be-market">Market size (units)<input id="be-market" type="number" min="0" step="1000" value="40000"></label>
+    </div>
+    <div class="cout">
+      <div><div class="k">Units needed</div><div class="v" id="be-units">–</div></div>
+      <div><div class="k">Revenue at that point</div><div class="v" id="be-rev">–</div></div>
+      <div><div class="k">Share of market</div><div class="v" id="be-share">–</div></div>
+    </div>
+    <p class="cnote" id="be-note" aria-live="polite"></p>
+    <div class="cbtns"><button class="btn small" type="button" id="be-reset">Reset</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Dividing fixed costs by the price instead of the contribution.</li>
+      <li>Mixing monthly and yearly numbers.</li>
+      <li>Treating a one-time build cost as a yearly fixed cost. Use payback for one-time costs.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="2">
+    <div class="mc-head"><p class="stem" data-say>Quick check: fixed costs are 100 thousand, price is 20 dollars, and variable cost is 15. How many units to break even?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>5,000</button>
+      <button class="opt" type="button" data-say>6,667</button>
+      <button class="opt" type="button" data-say>20,000</button>
+      <button class="opt" type="button" data-say>100,000</button>
+    </div>
+    <div class="why" hidden><p data-say>Each unit contributes 5 dollars. 100 thousand divided by 5 is 20 thousand. Dividing by the 20 dollar price gives 5,000, which ignores variable costs.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. Price 8 dollars, variable cost 3, fixed costs 50 thousand. How many units for a 25 thousand dollar profit?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-be-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-be-1" hidden><div class="script"><p data-say>"15 thousand. 50 plus 25 is 75 thousand to cover, divided by 5 dollars a unit."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. A 500 thousand dollar machine saves 125 thousand a year. Payback?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-be-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-be-2" hidden><div class="script"><p data-say>"4 years. 500 divided by 125."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. A 200-room hotel charges 150 dollars, with 50 dollars of cost per occupied night and 6 million of fixed costs a year. How many nights must rooms be filled?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-be-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-be-3" hidden><div class="script"><p data-say>"300 nights a year. A full night brings in 200 rooms times 100 dollars, or 20 thousand. 6 million divided by 20 thousand is 300. That's about 82 percent occupancy, which is risky."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. Same as the quick check, but the price drops from 20 to 18 dollars. What happens to break-even?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-be-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-be-4" hidden><div class="script"><p data-say>"It jumps from 20 thousand to about 33 thousand units, up two-thirds. A 10 percent price cut shrinks the contribution from 5 dollars to 3."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 07 PROBABILITY -->
+<section class="step" id="prob">
+  <div class="sh"><span class="idx">07</span><h2>Probability and expected value</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Used for risks, launches, and anything uncertain. The idea: weight each outcome by its chance.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Expected value</b><p>Value times chance. With several outcomes, add up each value times its chance.</p></div>
+    <div class="term" data-say><b>Expected yearly loss</b><p>Cost if it happens, times the chance per year. A 20 percent chance a year is about once every five years, so spread the cost over five years.</p></div>
+    <div class="term" data-say><b>All must happen: multiply</b><p>Pass step 1 at 50 percent and step 2 at 60 percent: 0.5 times 0.6 is 30 percent for both.</p></div>
+    <div class="term" data-say><b>Doesn't happen</b><p>One minus the chance. A 20 percent chance of rain is an 80 percent chance of none.</p></div>
+    <div class="term" data-say><b>At least once</b><p>One minus the chance it never happens. 20 percent a year for two years: 1 minus 0.8 times 0.8, or 36 percent.</p></div>
+    <div class="term" data-say><b>Break-even chance</b><p>The chance of success at which the expected value is exactly zero. Above it, go; below it, don't.</p></div>
+  </div>
+  <div class="eq">Expected value = Σ (outcome × chance) · All steps: multiply the chances</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A product launch has a 60 percent chance of success, earning 50 million. If it fails, the company loses 20 million. Should it launch?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Weight each outcome by its chance and add them. Then find the break-even chance.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="90">90s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Success. 60 percent times 50 million is 30 million."><span class="t">1 · Success</span><span class="f">60% × $50M</span><span class="r tnum">$30M</span></li>
+      <li class="st" hidden data-say="Step 2. Failure. 40 percent times minus 20 million is minus 8 million."><span class="t">2 · Failure</span><span class="f">40% × −$20M</span><span class="r tnum">−$8M</span></li>
+      <li class="st" hidden data-say="Step 3. Expected value. 30 minus 8 is 22 million. Positive, so launch."><span class="t">3 · Expected value</span><span class="f">$30M − $8M</span><span class="r tnum">+$22M</span></li>
+      <li class="st" hidden data-say="Step 4. Break-even chance. Success instead of failure swings the result by 70 million, from minus 20 to plus 50. The chance of success needs to cover the 20 million downside: 20 divided by 70 is about 29 percent."><span class="t">4 · Break-even chance</span><span class="f">Downside ÷ total swing: $20M ÷ ($50M + $20M)</span><span class="r tnum">≈29%</span></li>
+      <li class="st" hidden data-say="Step 5. So what. Launch. The odds would have to fall below about 29 percent before it stops making sense, and they're 60."><span class="t">5 · So what</span><span class="f">60% is well above the 29% break-even</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 5</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Adding chances that all have to happen. Multiply them.</li>
+      <li>Confusing the impact with the expected value. 45 million if it happens, at 20 percent, is 9 million expected.</li>
+      <li>Forgetting the failure case, which is often negative.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="0">
+    <div class="mc-head"><p class="stem" data-say>Quick check: a drug must pass three stages at 50, 60, and 50 percent. What's the chance it passes all three?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>15 percent</button>
+      <button class="opt" type="button" data-say>53 percent</button>
+      <button class="opt" type="button" data-say>50 percent</button>
+      <button class="opt" type="button" data-say>160 percent</button>
+    </div>
+    <div class="why" hidden><p data-say>0.5 times 0.6 is 0.3, times 0.5 is 0.15. Averaging gives about 53, and adding gives 160, both wrong, because each stage only applies to the ones that passed the stage before.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. A 30 million dollar lawsuit has a 10 percent chance a year. Expected yearly cost?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pr-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pr-1" hidden><div class="script"><p data-say>"3 million a year. About once every 10 years, so 30 divided by 10."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. 80 percent times 30 percent times 50 percent times 75 percent?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pr-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pr-2" hidden><div class="script"><p data-say>"9 percent. 80 times 30 is 24, times 50 is 12, times 75 is 9."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. A bid costs half a million to prepare and has a 25 percent chance of winning a contract worth 4 million in profit. Bid?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pr-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pr-3" hidden><div class="script"><p data-say>"Yes. 25 percent of 4 million is 1 million, minus the half million cost, is plus half a million expected."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. A risk has a 20 percent chance each year. What's the chance it happens at least once in 2 years?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-pr-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-pr-4" hidden><div class="script"><p data-say>"36 percent. The chance it never happens is 0.8 times 0.8, or 64 percent. 100 minus 64 is 36."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 08 VALUATION -->
+<section class="step" id="value">
+  <div class="sh"><span class="idx">08</span><h2>Valuation and deal math</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Deal cases price a company from its yearly profit. One rule does most of the work: price equals yearly EBITDA times a multiple.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Price from profit</b><p>Value equals yearly EBITDA times a multiple. The multiple is how many years of today's profit a buyer pays up front.</p></div>
+    <div class="term" data-say><b>Where the multiple comes from</b><p>What similar companies sold for, divided by their EBITDA. Faster growth and lower risk push it up. In interviews, ask for it; don't invent it.</p></div>
+    <div class="term" data-say><b>Repeats every year: multiply</b><p>Anything that changes yearly profit changes the price by that amount times the multiple. Losing 2 million a year at 12 times is 24 million of value.</p></div>
+    <div class="term" data-say><b>One-time: dollar for dollar</b><p>A one-time fine, debt, or cleanup cost comes off the price once. A 5 million fine is 5 million less, not 60.</p></div>
+    <div class="term" data-say><b>Business vs. shares</b><p>The multiple prices the whole business. Subtract debt and add cash to get what the shares are worth.</p></div>
+    <div class="term" data-say><b>Premium and synergies</b><p>A premium is what a buyer pays above the standalone value. It's worth it only if synergies, times a multiple, minus one-time costs, are worth more.</p></div>
+  </div>
+  <div class="eq">Business value = EBITDA × multiple · Share value = business value − debt + cash</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>A seller asks 200 million for a company with 10 million of EBITDA. Diligence finds 1.5 million of that came from a one-time sale. The company has 30 million of debt and 5 million of cash. What are the shares worth at the same multiple?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Find the multiple the seller is using. Fix the profit, value the business, then move from the business to the shares.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="90">90s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. The seller's multiple. 200 million divided by 10 million is 20 times. Every dollar of yearly profit is priced at 20 dollars."><span class="t">1 · Seller's multiple</span><span class="f">$200M ÷ $10M</span><span class="r tnum">20×</span></li>
+      <li class="st" hidden data-say="Step 2. Real EBITDA. 10 minus the 1.5 million one-time sale is 8.5 million."><span class="t">2 · Real EBITDA</span><span class="f">$10M − $1.5M one-time</span><span class="r tnum">$8.5M</span></li>
+      <li class="st" hidden data-say="Step 3. Business value. 8.5 million times 20 is 170 million."><span class="t">3 · Business value</span><span class="f">$8.5M × 20</span><span class="r tnum">$170M</span></li>
+      <li class="st" hidden data-say="Step 4. Net debt. 30 million of debt minus 5 million of cash is 25 million."><span class="t">4 · Net debt</span><span class="f">$30M debt − $5M cash</span><span class="r tnum">$25M</span></li>
+      <li class="st" hidden data-say="Step 5. Share value. 170 minus 25 is 145 million."><span class="t">5 · Share value</span><span class="f">$170M − $25M</span><span class="r tnum">$145M</span></li>
+      <li class="st" hidden data-say="Step 6. So what. The shares are worth about 145 million, not 200. 30 million comes off because the profit wasn't all real, and 25 million because of the debt."><span class="t">6 · So what</span><span class="f">−$30M for the profit fix, −$25M for net debt</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 6</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="calcbox">
+    <h3>Valuation calculator</h3>
+    <p class="sub">Starts with the example. Change the adjustment to see the 20× effect, or the debt to see the 1× effect.</p>
+    <div class="cgrid">
+      <label for="va-ebitda">Reported EBITDA ($M)<input id="va-ebitda" type="number" step="0.5" value="10"></label>
+      <label for="va-adj">Adjustments to yearly EBITDA ($M)<input id="va-adj" type="number" step="0.5" value="-1.5"></label>
+      <label for="va-mult">Multiple (×)<input id="va-mult" type="number" min="0" step="0.5" value="20"></label>
+      <label for="va-once">One-time items ($M, − or +)<input id="va-once" type="number" step="0.5" value="0"></label>
+      <label for="va-debt">Debt ($M)<input id="va-debt" type="number" min="0" step="1" value="30"></label>
+      <label for="va-cash">Cash ($M)<input id="va-cash" type="number" min="0" step="1" value="5"></label>
+    </div>
+    <div class="cout">
+      <div><div class="k">Real EBITDA</div><div class="v" id="va-adjE">–</div></div>
+      <div><div class="k">Business value</div><div class="v" id="va-ev">–</div></div>
+      <div><div class="k">Share value</div><div class="v" id="va-eq">–</div></div>
+    </div>
+    <p class="cnote" id="va-note" aria-live="polite"></p>
+    <div class="cbtns"><button class="btn small" type="button" id="va-reset">Reset</button></div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Multiplying a one-time item. Only yearly changes get the multiple.</li>
+      <li>Forgetting debt when the question asks what the shares are worth.</li>
+      <li>Mixing an EBITDA multiple with net income, or the other way around.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="0">
+    <div class="mc-head"><p class="stem" data-say>Quick check: a company has 12 million of EBITDA, a 9 times multiple, and 20 million of net debt. What are the shares worth?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>88 million</button>
+      <button class="opt" type="button" data-say>108 million</button>
+      <button class="opt" type="button" data-say>128 million</button>
+      <button class="opt" type="button" data-say>100 million</button>
+    </div>
+    <div class="why" hidden><p data-say>12 times 9 is 108 million for the business. Subtract 20 million of net debt: 88 million for the shares.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. A company valued at 12 times has a 5 million one-time legal settlement. How much does the price fall?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-va-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-va-1" hidden><div class="script"><p data-say>"5 million. It's one-time, so it comes off dollar for dollar."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. The same company loses a customer worth 2 million of EBITDA a year. How much does the price fall?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-va-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-va-2" hidden><div class="script"><p data-say>"24 million. It repeats every year, so 2 million times 12."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. A buyer pays a 30 million premium. Synergies are 6 million a year, valued at 8 times, with 10 million of one-time integration costs. Worth it?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-va-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-va-3" hidden><div class="script"><p data-say>"Yes, by about 8 million. 6 times 8 is 48, minus 10 is 38 million of synergy value, against a 30 million premium."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>4. What's 1 million a year forever worth, if investors want an 8 percent return?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-va-4" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-va-4" hidden><div class="script"><p data-say>"12.5 million. 1 million divided by 8 percent. That's a 12.5 times multiple, which is where multiples come from: the return investors want, flipped."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 09 MARKET SIZING -->
+<section class="step" id="sizing">
+  <div class="sh"><span class="idx">09</span><h2>Market sizing</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>No one expects the exact number. Interviewers grade a clear structure, sensible assumptions said out loud, clean math, and a sanity check.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Top-down</b><p>Start big and narrow: population, times the share who buy, times how often, times the price.</p></div>
+    <div class="term" data-say><b>Bottom-up</b><p>Start with one unit and scale: one store's sales, times the number of stores.</p></div>
+    <div class="term" data-say><b>People or households?</b><p>Use households for things bought per home, like internet or sofas. Use people for personal items, like toothbrushes.</p></div>
+    <div class="term" data-say><b>Segment when groups differ</b><p>Split kids and adults, or homes and businesses, when they buy very differently.</p></div>
+  </div>
+  <div class="eq">Market = units × share who buy × how often × price</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>Estimate the yearly market for dog food in a city of 2 million people.</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Go through households, since dogs live in homes. State every assumption. Then check it a second way.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="120">2 min timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Households. Assume about 2.5 people per home. 2 million divided by 2.5 is 800 thousand homes."><span class="t">1 · Households</span><span class="f">2M people ÷ 2.5 per home</span><span class="r tnum">800K</span></li>
+      <li class="st" hidden data-say="Step 2. Homes with a dog. Assume 30 percent, with one dog each. That's 240 thousand dogs."><span class="t">2 · Dogs</span><span class="f">800K × 30%, one dog each</span><span class="r tnum">240K</span></li>
+      <li class="st" hidden data-say="Step 3. Bags a year. Assume one bag a month. 240 thousand times 12 is 2.88 million bags."><span class="t">3 · Bags a year</span><span class="f">240K × 12</span><span class="r tnum">2.88M</span></li>
+      <li class="st" hidden data-say="Step 4. Market. At 40 dollars a bag, 2.88 million times 40 is about 115 million dollars a year."><span class="t">4 · Market</span><span class="f">2.88M × $40</span><span class="r tnum">≈$115M</span></li>
+      <li class="st" hidden data-say="Step 5. Sanity check, bottom-up. If about 100 stores sell dog food, that's 1.15 million each a year, about 3 thousand dollars a day. Plausible."><span class="t">5 · Bottom-up check</span><span class="f">$115M ÷ 100 stores ≈ $3K a day each</span><span class="r tnum">✓</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 5</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <p class="src">Every number here is an interview-style assumption, not market data.</p>
+  <div class="panel" style="margin-top:16px">
+    <h3>Common traps</h3>
+    <ul data-say>
+      <li>Not saying assumptions out loud, so the interviewer can't follow or correct you.</li>
+      <li>Mixing people and households in the same chain.</li>
+      <li>Skipping the sanity check, which is where wrong zeros get caught.</li>
+    </ul>
+  </div>
+  <div class="mc" data-answer="2">
+    <div class="mc-head"><p class="stem" data-say>Quick check: which of these is bottom-up?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>Population times the share who drink coffee times cups a day.</button>
+      <button class="opt" type="button" data-say>Total snack sales times the plant-based share.</button>
+      <button class="opt" type="button" data-say>Cups one shop sells a day, times the number of shops in the city.</button>
+      <button class="opt" type="button" data-say>Last year's market times one plus growth.</button>
+    </div>
+    <div class="why" hidden><p data-say>Bottom-up starts from a single unit, one shop, and scales up. The others start from a big total and narrow it, which is top-down.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. 500 stores each sell 2 million dollars a year. Market?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-sz-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-sz-1" hidden><div class="script"><p data-say>"1 billion dollars. 500 times 2 million."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. A city of 1 million. 40 percent drive to work, 2 trips a day, 250 workdays. How many car commute trips a year?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-sz-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-sz-2" hidden><div class="script"><p data-say>"200 million. 400 thousand drivers, times 2, is 800 thousand trips a day, times 250 days."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. A 500 million dollar market. You have 8 percent. What share do you need for 60 million in sales?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-sz-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-sz-3" hidden><div class="script"><p data-say>"12 percent. You're at 40 million today. 60 divided by 500 is 12 percent, up 4 points."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 10 AVERAGES -->
+<section class="step" id="avg">
+  <div class="sh"><span class="idx">10</span><h2>Weighted averages and mix</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>When groups are different sizes, a simple average is wrong. Weight each group by how big it is.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Weighted average</b><p>Multiply each value by its share, then add. Shares must add to 100 percent.</p></div>
+    <div class="term" data-say><b>Mix shift</b><p>The overall average can change even when no single part changes, just because the mix moved toward one group.</p></div>
+  </div>
+  <div class="eq">Weighted average = Σ (value × share)</div>
+
+  <div class="iv">
+    <p class="who">Interviewer</p>
+    <p data-say>Product A is 70 percent of sales at a 20 percent margin. Product B is 30 percent of sales at a 50 percent margin. What's the overall margin, and what happens if the mix moves to 50-50?</p>
+  </div>
+  <div class="move">
+    <span class="lbl">Your move</span>
+    <p data-say>Weight each margin by its share of sales, then add.</p>
+    <div class="acts"><button class="btn small timer" type="button" data-secs="60">60s timer</button></div>
+  </div>
+  <div class="stepper" style="margin-top:14px">
+    <ol class="calc">
+      <li class="st" hidden data-say="Step 1. Product A. 70 percent times 20 percent is 14 points."><span class="t">1 · Product A</span><span class="f">70% × 20%</span><span class="r tnum">14 pts</span></li>
+      <li class="st" hidden data-say="Step 2. Product B. 30 percent times 50 percent is 15 points."><span class="t">2 · Product B</span><span class="f">30% × 50%</span><span class="r tnum">15 pts</span></li>
+      <li class="st" hidden data-say="Step 3. Overall margin. 14 plus 15 is 29 percent. A simple average would say 35, which is wrong."><span class="t">3 · Overall margin</span><span class="f">14 + 15 (not the simple average of 35)</span><span class="r tnum">29%</span></li>
+      <li class="st" hidden data-say="Step 4. At a 50-50 mix. Half of 20 plus half of 50 is 10 plus 25, or 35 percent."><span class="t">4 · At 50-50</span><span class="f">50% × 20% + 50% × 50%</span><span class="r tnum">35%</span></li>
+      <li class="st" hidden data-say="Step 5. So what. Selling more of B lifts the margin 6 points without changing a single price."><span class="t">5 · So what</span><span class="f">Mix alone adds 6 points of margin</span><span class="r tnum">+6 pts</span></li>
+    </ol>
+    <div class="row"><button class="btn primary small next" type="button">Reveal step 1 of 5</button><button class="btn small reset" type="button">Start over</button></div>
+  </div>
+  <div class="mc" data-answer="2">
+    <div class="mc-head"><p class="stem" data-say>Quick check: 20 students average 80 on a test, and 30 students average 90. What's the class average?</p></div>
+    <div class="opts">
+      <button class="opt" type="button" data-say>85</button>
+      <button class="opt" type="button" data-say>84</button>
+      <button class="opt" type="button" data-say>86</button>
+      <button class="opt" type="button" data-say>88</button>
+    </div>
+    <div class="why" hidden><p data-say>20 times 80 is 1,600. 30 times 90 is 2,700. Together, 4,300 points over 50 students is 86. The simple average of 85 ignores that the second group is bigger.</p></div>
+  </div>
+  <div class="reps">
+    <div class="rep"><p class="rq" data-say>1. 100 rooms sell for 200 dollars and 300 rooms for 100. Average room rate?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-av-1" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-av-1" hidden><div class="script"><p data-say>"125 dollars. 20 thousand plus 30 thousand is 50 thousand, over 400 rooms."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>2. Region A is 60 percent of revenue and grows 5 percent. Region B is 40 percent and grows 20 percent. Total growth?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-av-2" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-av-2" hidden><div class="script"><p data-say>"11 percent. 60 percent of 5 is 3, plus 40 percent of 20 is 8."</p></div></div></div>
+    <div class="rep"><p class="rq" data-say>3. 80 percent of customers pay 10 dollars and 20 percent pay 50. Average?</p><div class="acts"><button class="btn primary small reveal" type="button" aria-controls="r-av-3" aria-expanded="false">Show answer</button></div>
+      <div class="ans" id="r-av-3" hidden><div class="script"><p data-say>"18 dollars. 8 plus 10."</p></div></div></div>
+  </div>
+</section>
+
+<!-- 11 CHEAT SHEET -->
+<section class="step" id="cheat">
+  <div class="sh"><span class="idx">11</span><h2>Formula cheat sheet</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Everything on one screen. Read it the night before.</p>
+  <div class="vocab">
+    <div class="term" data-say><b>Percent change</b><p>(new − old) ÷ old</p></div>
+    <div class="term" data-say><b>Going backward from a percent</b><p>Original = final ÷ (1 + change)</p></div>
+    <div class="term" data-say><b>Compounding</b><p>Start × (1 + growth)^years. Years to double ≈ 72 ÷ growth %</p></div>
+    <div class="term" data-say><b>Profit</b><p>Revenue − fixed costs − variable costs</p></div>
+    <div class="term" data-say><b>Margin vs. markup</b><p>Margin = profit ÷ price. Markup = profit ÷ cost</p></div>
+    <div class="term" data-say><b>Contribution per unit</b><p>Price − variable cost per unit</p></div>
+    <div class="term" data-say><b>Break-even units</b><p>(Fixed costs + target profit) ÷ contribution per unit</p></div>
+    <div class="term" data-say><b>Payback</b><p>Up-front cost ÷ yearly profit or savings</p></div>
+    <div class="term" data-say><b>Expected value</b><p>Sum of each outcome × its chance. All steps must happen: multiply</p></div>
+    <div class="term" data-say><b>At least once</b><p>1 − (1 − chance)^years</p></div>
+    <div class="term" data-say><b>Business value</b><p>EBITDA × multiple. Yearly changes × multiple; one-time items × 1</p></div>
+    <div class="term" data-say><b>Share value</b><p>Business value − debt + cash</p></div>
+    <div class="term" data-say><b>Deal creates value if</b><p>Synergies × multiple − one-time costs > premium</p></div>
+    <div class="term" data-say><b>Forever value</b><p>Yearly amount ÷ return wanted. 10% wanted = 10×</p></div>
+    <div class="term" data-say><b>Market size</b><p>Units × share who buy × how often × price</p></div>
+    <div class="term" data-say><b>Weighted average</b><p>Sum of each value × its share</p></div>
+  </div>
+</section>
+
+<!-- 12 TEST -->
+<section class="step test" id="test">
+  <div class="sh"><span class="idx">12</span><h2>Practice test</h2><button class="btn small listen" type="button">Listen</button></div>
+  <p class="sub" data-say>Sixteen mixed questions, the way they show up in real cases. Pick an answer to see the explanation.</p>
+  <div class="scorebar"><span class="score" id="score">0 / 0<small>answered 0 of 16</small></span><button class="btn small" type="button" id="resetTest">Reset test</button></div>
+  <div id="testq"></div>
+  <div class="done" id="done" hidden></div>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>A practice page for case interview math. Every example uses interview-style numbers, not real company or market data. Several examples echo the mock cases on this site: CoffeeCo, Fernway, BrightLeaf, the luxury hotel, and Hair Restore.</p>
+    <p>Night-before tip: do one rep from each topic out loud, then read the cheat sheet once.</p>
+  </div>
+</footer>
+<div id="tip" hidden role="tooltip"></div>
+<script>
+(function(){
+  "use strict";
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+  const NS="http://www.w3.org/2000/svg";
+  const svgEl=(t,a={})=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+  const LET="ABCD";
+
+  /* ---------- tooltip ---------- */
+  const tip=$("#tip");
+  function showTip(el,x,y){tip.textContent=el.getAttribute("data-tip");tip.hidden=false;
+    const w=tip.offsetWidth,h=tip.offsetHeight;let L=x+12,T=y-h-10;
+    if(L+w>innerWidth-8)L=x-w-12; if(T<8)T=y+14; tip.style.left=Math.max(8,L)+"px";tip.style.top=T+"px";}
+  document.addEventListener("pointermove",e=>{const t=e.target.closest&&e.target.closest("[data-tip]");if(t)showTip(t,e.clientX,e.clientY);else tip.hidden=true;});
+  document.addEventListener("focusin",e=>{const t=e.target.closest&&e.target.closest("[data-tip]");if(t){const r=t.getBoundingClientRect();showTip(t,r.left+r.width/2,r.top);}});
+  document.addEventListener("focusout",()=>{tip.hidden=true;});
+  addEventListener("scroll",()=>{tip.hidden=true;},{passive:true});
+
+  /* ---------- reveal toggles ---------- */
+  $$(".reveal").forEach(b=>{const t=document.getElementById(b.getAttribute("aria-controls"));const show=b.textContent;
+    const hide=show.startsWith("Show as")?"Hide table":"Hide";
+    b.addEventListener("click",()=>{const open=t.hidden;t.hidden=!open;b.setAttribute("aria-expanded",String(open));b.textContent=open?hide:show;});});
+
+  /* ---------- timers ---------- */
+  let actx=null;
+  function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(.2,actx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+.5);o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+.55);}catch(e){}}
+  $$(".timer").forEach(b=>{const secs=+b.dataset.secs,label=b.textContent;let id=null,left=0;
+    const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+    b.addEventListener("click",()=>{
+      if(id){clearInterval(id);id=null;b.textContent=label;b.setAttribute("aria-pressed","false");return;}
+      try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){}
+      left=secs;b.textContent=fmt(left)+" · stop";b.setAttribute("aria-pressed","true");
+      id=setInterval(()=>{left--;if(left<=0){clearInterval(id);id=null;b.textContent="Time. Answer now";b.setAttribute("aria-pressed","false");beep();setTimeout(()=>{if(!id)b.textContent=label;},4000);return;}b.textContent=fmt(left)+" · stop";},1000);
+    });});
+
+  /* ---------- steppers ---------- */
+  $$(".stepper").forEach(s=>{const steps=$$(".st",s),next=$(".next",s),reset=$(".reset",s);let i=0;
+    const upd=()=>{next.hidden=i>=steps.length;next.textContent="Reveal step "+(i+1)+" of "+steps.length;};
+    next.addEventListener("click",()=>{if(i<steps.length){steps[i].hidden=false;i++;upd();}});
+    reset.addEventListener("click",()=>{steps.forEach(x=>x.hidden=true);i=0;upd();});upd();});
+
+
+  /* ---------- chart builders ---------- */
+  function niceMax(m){const steps=[1,1.5,2,2.5,3,4,5,6,8,10,12,15,20,25,30,40,50,60,80,100,120,150,200,250,300,400,500,600,800,1000,1200,1500,2000];for(const s of steps)if(s>=m)return s;return Math.ceil(m/500)*500;}
+  function roundTop(x,y,w,h,r){r=Math.min(r,h,w/2);return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;}
+  function multiples(el,Q,SER){
+    SER.forEach(s=>{
+      const f=s.f||(v=>String(v)),n=s.v.length,last=n-1;
+      const card=document.createElement("div");card.className="mini";
+      card.innerHTML=`<div class="nm">${s.k}</div><div class="ch">${f(s.v[0])} → ${f(s.v[last])}</div>`;
+      const W=200,H=104,top=18,bot=20,pl=4,pr=4,ph=H-top-bot,band=(W-pl-pr)/n,bw=Math.min(22,band*.58),max=niceMax(Math.max(...s.v)*1.12);
+      const svg=svgEl("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":`${s.k}: ${s.v.map((v,i)=>Q[i]+" "+f(v)).join(", ")}`});
+      s.v.forEach((v,i)=>{const cx=pl+band*i+band/2,h=Math.max(1,v/max*ph),x=cx-bw/2,y=top+ph-h;
+        svg.appendChild(svgEl("path",{d:roundTop(x,y,bw,h,4),fill:"var(--s1)"}));
+        if(i===0||i===last){const edge=n>6,tx=edge?(i===0?Math.max(1,x):Math.min(W-1,x+bw)):cx,an=edge?(i===0?"start":"end"):"middle";const t=svgEl("text",{x:tx,y:y-5,"text-anchor":an,"font-size":"10.5","font-weight":"600",fill:"var(--fg-2)"});t.textContent=f(v);svg.appendChild(t);}
+        const q=svgEl("text",{x:cx,y:H-5,"text-anchor":"middle","font-size":n>5?"8.5":"9.5",fill:"var(--muted)"});q.textContent=Q[i];svg.appendChild(q);
+        svg.appendChild(svgEl("rect",{x:pl+band*i,y:0,width:band,height:H,fill:"transparent","data-tip":`${s.k} · ${Q[i]}: ${f(v)}`}));
+      });
+      svg.insertBefore(svgEl("line",{x1:0,x2:W,y1:top+ph+.5,y2:top+ph+.5,stroke:"var(--axis)","stroke-width":"1"}),svg.firstChild);
+      card.appendChild(svg);el.appendChild(card);
+    });
+  }
+  function multTable(el,Q,SER){
+    el.innerHTML=`<table><thead><tr><th>Measure</th>${Q.map(q=>`<th class="n">${q}</th>`).join("")}</tr></thead><tbody>${SER.map(s=>`<tr><td>${s.k}</td>${s.v.map(v=>`<td class="n">${(s.f||String)(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  function axis(el,o){const ax=document.createElement("div");ax.className="axis";
+    ax.innerHTML=`<div></div><div class="ticks">${o.ticks.map(v=>`<span style="left:${v/o.max*100}%">${o.tick(v)}</span>`).join("")}</div>`;el.appendChild(ax);
+    if(o.ref&&o.ref.note){const p=document.createElement("p");p.className="tolnote";p.textContent=o.ref.note;el.appendChild(p);}}
+  /* one bar per row: rows {d,t,v,lab,tip,st:{bad,txt}} */
+  function hbar(el,rows,o){
+    rows.forEach(r=>{const row=document.createElement("div");row.className="hrow";const w=r.v/o.max*100;
+      row.innerHTML=`<div class="hlab"><b>${r.d}</b>${r.t?`<span>${r.t}</span>`:""}${r.st?`<span class="status ${r.st.bad?"bad":"ok"}">${r.st.bad?"▲ ":"✓ "}${r.st.txt}</span>`:""}</div>
+        <div class="track" tabindex="0" data-tip="${r.tip||r.d+": "+r.lab}"><div class="bar" style="width:${Math.max(.4,w)}%"></div><span class="bval" style="left:${w}%">${r.lab}</span>${o.ref?`<div class="tol" style="left:${o.ref.at/o.max*100}%"></div>`:""}</div>`;
+      el.appendChild(row);});
+    axis(el,o);
+  }
+  /* stacked segments, total named in the label: rows {n,d,seg:[[v,cls,tip]]} */
+  function stack(el,rows,o){
+    rows.forEach(r=>{const row=document.createElement("div");row.className="hrow";let x=0,bars="";
+      r.seg.forEach(([v,c,t],i)=>{const left=x/o.max*100,w=v/o.max*100;
+        bars+=`<div class="bar ${c}" tabindex="0" data-tip="${t}" style="left:calc(${left}% + ${i?2:0}px);width:calc(${w}% - ${i?2:0}px);border-radius:${i===r.seg.length-1?"0 4px 4px 0":"0"}"></div>`;x+=v;});
+      row.innerHTML=`<div class="hlab"><b>${r.n}</b><span>${r.d}</span></div><div class="track">${bars}${o.ref?`<div class="tol" style="left:${o.ref.at/o.max*100}%"></div>`:""}</div>`;
+      el.appendChild(row);});
+    axis(el,o);
+  }
+  /* waterfall: rows {n,d,total} or {n,d,delta}; totals neutral, ups blue, downs orange */
+  function waterfall(el,rows,o){let run=0;
+    rows.forEach(r=>{const row=document.createElement("div");row.className="hrow";let bar,lab,tip;
+      if(r.total!==undefined){run=r.total;bar=`<div class="bar b3" style="width:${r.total/o.max*100}%"></div>`;lab=`<span class="bval" style="left:${r.total/o.max*100}%">${o.fmt(r.total)}</span>`;tip=`${r.n}: ${o.fmt(r.total)}`;}
+      else{const a=Math.min(run,run+r.delta),b=Math.max(run,run+r.delta);
+        bar=`<div class="bar ${r.delta<0?"b2":""}" style="left:${a/o.max*100}%;width:${(b-a)/o.max*100}%;border-radius:3px"></div>`;
+        lab=`<span class="bval" style="left:${b/o.max*100}%">${r.delta<0?"−":"+"}${o.fmt(Math.abs(r.delta))}</span>`;tip=`${r.n}: ${r.delta<0?"−":"+"}${o.fmt(Math.abs(r.delta))}`;run+=r.delta;}
+      row.innerHTML=`<div class="hlab"><b>${r.n}</b><span>${r.d}</span></div><div class="track" tabindex="0" data-tip="${tip}">${bar}${lab}</div>`;
+      el.appendChild(row);});
+    axis(el,o);
+  }
+
+  /* ---------- heat map you score ---------- */
+  function heatScorer(HM){
+    const band=s=>s>=20?5:s>=15?4:s>=9?3:s>=5?2:1;
+    const C=54,ox=84,oy=8,G=C*5,HW=ox+G+8,HH=oy+G+52;
+    const hs=svgEl("svg",{viewBox:`0 0 ${HW} ${HH}`,role:"img","aria-label":"Heat map"});
+    for(let X=1;X<=5;X++)for(let Y=1;Y<=5;Y++)
+      hs.appendChild(svgEl("rect",{x:ox+(X-1)*C+1,y:oy+(5-Y)*C+1,width:C-2,height:C-2,rx:3,fill:`var(--h${band(X*Y)})`}));
+    for(let k=1;k<=5;k++){
+      const t=svgEl("text",{x:ox+(k-.5)*C,y:oy+G+15,"text-anchor":"middle","font-size":"11",fill:"var(--fg-2)"});t.textContent=k;hs.appendChild(t);
+      if(HM.lx[k-1]){const t2=svgEl("text",{x:ox+(k-.5)*C,y:oy+G+28,"text-anchor":"middle","font-size":"9.5",fill:"var(--muted)"});t2.textContent=HM.lx[k-1];hs.appendChild(t2);}
+      const u=svgEl("text",{x:ox-8,y:oy+(5-k+.5)*C+4,"text-anchor":"end","font-size":"11",fill:"var(--fg-2)"});u.textContent=k;hs.appendChild(u);
+      if(HM.ly[k-1]){const u2=svgEl("text",{x:ox-20,y:oy+(5-k+.5)*C+4,"text-anchor":"end","font-size":"9.5",fill:"var(--muted)"});u2.textContent=HM.ly[k-1];hs.appendChild(u2);}
+    }
+    const xt=svgEl("text",{x:ox+G/2,y:oy+G+46,"text-anchor":"middle","font-size":"11","font-weight":"600",fill:"var(--fg)"});xt.textContent=HM.xName+" →";hs.appendChild(xt);
+    const yt=svgEl("text",{x:9,y:oy+G/2,"text-anchor":"middle","font-size":"11","font-weight":"600",fill:"var(--fg)",transform:`rotate(-90 9 ${oy+G/2})`});yt.textContent=HM.yName+" →";hs.appendChild(yt);
+    const dots=svgEl("g");hs.appendChild(dots);$("#heatmap").appendChild(hs);
+    const IT=HM.items,xn=HM.xName.toLowerCase(),yn=HM.yName.toLowerCase();
+    const opt=lab=>`<option value="">${lab}</option>`+[1,2,3,4,5].map(v=>`<option value="${v}">${v}</option>`).join("");
+    $("#scorer").innerHTML=IT.map(r=>`<li><span class="id">${r.id}</span><span class="nm">${r.n}</span><span class="pick"><select id="x-${r.id}" aria-label="${r.id} ${xn}, 1 to 5">${opt(HM.xs)}</select><select id="y-${r.id}" aria-label="${r.id} ${yn}, 1 to 5">${opt(HM.ys)}</select><span class="sc" id="s-${r.id}">–</span></span></li>`).join("");
+    const rank=(a,b)=>b.x*b.y-a.x*a.y||b.y-a.y;
+    $("#teamlist").innerHTML=[...IT].sort(rank).map(r=>`<li data-say="${r.id}. ${r.n}. ${HM.xName} ${r.x}, ${yn} ${r.y}, score ${r.x*r.y}. ${r.w}"><span class="id">${r.id}</span><span class="nm"><b>${r.n}</b><span class="w">${r.w}</span></span><span class="sc">${r.x}×${r.y} = ${r.x*r.y}</span></li>`).join("");
+    let mode="mine";
+    const mine=()=>IT.map(r=>({id:r.id,n:r.n,x:+$("#x-"+r.id).value,y:+$("#y-"+r.id).value})).filter(r=>r.x&&r.y);
+    const offsets=n=>n<=1?[[0,0]]:n===2?[[-12,0],[12,0]]:n<=4?[[-12,-11],[12,-11],[-12,11],[12,11]]:[[-15,-11],[0,-11],[15,-11],[-15,11],[0,11],[15,11]];
+    function plot(list){
+      while(dots.firstChild)dots.removeChild(dots.firstChild);
+      const cells={};list.forEach(r=>{const k=r.x+"-"+r.y;(cells[k]=cells[k]||[]).push(r);});
+      Object.values(cells).forEach(arr=>{const off=offsets(arr.length),big=arr.length===1,rad=big?14:arr.length<=4?10:8;
+        arr.forEach((r,j)=>{const cx=ox+(r.x-.5)*C+off[j][0],cy=oy+(5-r.y+.5)*C+off[j][1];
+          const g=svgEl("g",{tabindex:"0","data-tip":`${r.id} · ${r.n}: ${xn} ${r.x}, ${yn} ${r.y}, score ${r.x*r.y}`});
+          g.appendChild(svgEl("circle",{cx,cy,r:rad+2,fill:"var(--surface)"}));
+          g.appendChild(svgEl("circle",{cx,cy,r:rad,fill:"var(--dot)"}));
+          const t=svgEl("text",{x:cx,y:cy+(big?4:3),"text-anchor":"middle","font-size":big?"11":"8.5","font-weight":"600",fill:"var(--dot-ink)"});t.textContent=r.id;g.appendChild(t);
+          dots.appendChild(g);});});
+      hs.setAttribute("aria-label",`Heat map of ${xn} by ${yn}, ${mode==="team"?"team's scores":"your scores"}. `+(list.length?list.map(r=>`${r.id}: ${xn} ${r.x}, ${yn} ${r.y}`).join(". "):"Nothing scored yet."));
+    }
+    function render(){
+      const m=mine();
+      IT.forEach(r=>{const x=+$("#x-"+r.id).value,y=+$("#y-"+r.id).value;$("#s-"+r.id).textContent=x&&y?"= "+x*y:"–";});
+      const top=$("#mytop");
+      if(!m.length)top.textContent=`Score all ${IT.length} to see your top three.`;
+      else if(m.length<IT.length)top.textContent=`Scored ${m.length} of ${IT.length}. Score all ${IT.length} to see your top three.`;
+      else top.textContent="Your top three by score: "+[...m].sort(rank).slice(0,3).map(r=>`${r.id} (${r.x*r.y})`).join(", ")+".";
+      const note=$("#mapnote");
+      if(mode==="team"){plot(IT);note.textContent="Showing the team's scores. Switch back to compare with yours.";}
+      else{plot(m);note.textContent=m.length?"Showing your scores. Shared cells show dots side by side.":"Your dots appear here as you score each one.";}
+    }
+    function setMode(v){mode=v;$("#mMine").setAttribute("aria-pressed",String(v==="mine"));$("#mTeam").setAttribute("aria-pressed",String(v==="team"));render();}
+    $("#scorer").addEventListener("change",()=>{if(mode!=="mine")setMode("mine");else render();});
+    $("#mMine").addEventListener("click",()=>setMode("mine"));
+    $("#mTeam").addEventListener("click",()=>{if(!$("#mTeam").disabled)setMode("team");});
+    $("#rv-prio").addEventListener("click",()=>{$("#mTeam").disabled=false;setMode($("#a-prio").hidden?"mine":"team");});
+    render();
+  }
+
+  const PAGEKEY="casemath";
+  const nf=(v,d=0)=>Number(v).toLocaleString("en-US",{maximumFractionDigits:d,minimumFractionDigits:0});
+  const sg=v=>(v<0?"−":"")+nf(Math.abs(v),2);
+  const pf=v=>(v<0?"−":v>0?"+":"")+nf(Math.abs(v)*100,1)+"%";
+  const mM=v=>(v<0?"−":"")+"$"+nf(Math.abs(v),2)+"M";
+
+  /* Growth chart */
+  hbar($("#gro"),[
+    {d:"Today",t:"Start",v:200,lab:"$200M"},
+    {d:"Year 1",t:"+$20M",v:220,lab:"$220M"},
+    {d:"Year 2",t:"+$22M",v:242,lab:"$242M"},
+    {d:"Year 3",t:"+$24.2M",v:266.2,lab:"$266M"},
+  ],{max:320,ticks:[0,100,200,300],tick:v=>"$"+v+"M"});
+
+  /* Break-even by price chart */
+  hbar($("#bep"),[
+    {d:"$45 a month",t:"$35 contribution",v:1714,lab:"≈1,714"},
+    {d:"$50 a month",t:"$40 contribution",v:1500,lab:"1,500"},
+    {d:"$55 a month",t:"$45 contribution",v:1333,lab:"≈1,333"},
+    {d:"$60 a month",t:"$50 contribution",v:1200,lab:"1,200"},
+  ],{max:2100,ticks:[0,500,1000,1500,2000],tick:v=>nf(v)});
+
+  /* Percent change calculator */
+  const PCD={old:250,new:200};
+  function pcCalc(){const o=parseFloat($("#pc-old").value),n=parseFloat($("#pc-new").value);
+    if(isNaN(o)||isNaN(n)||o===0){["chg","pct","back"].forEach(k=>$("#pc-"+k).textContent="–");return;}
+    $("#pc-chg").textContent=sg(n-o);$("#pc-pct").textContent=pf((n-o)/o);$("#pc-back").textContent=n===0?"–":pf((o-n)/n);}
+  ["old","new"].forEach(k=>$("#pc-"+k).addEventListener("input",pcCalc));
+  $("#pc-reset").addEventListener("click",()=>{$("#pc-old").value=PCD.old;$("#pc-new").value=PCD.new;pcCalc();});
+  pcCalc();
+
+  /* Growth calculator */
+  const GRD={start:200,rate:10,years:3};
+  function grCalc(){const g=k=>{const v=parseFloat($("#gr-"+k).value);return isNaN(v)?0:v;};
+    const s=g("start"),r=g("rate")/100,y=g("years"),end=s*Math.pow(1+r,y);
+    $("#gr-end").textContent=nf(end,1);$("#gr-total").textContent=s?pf(end/s-1):"–";
+    $("#gr-double").textContent=r>0?"≈"+nf(Math.log(2)/Math.log(1+r),1)+" years":"never";}
+  ["start","rate","years"].forEach(k=>$("#gr-"+k).addEventListener("input",grCalc));
+  $("#gr-reset").addEventListener("click",()=>{Object.keys(GRD).forEach(k=>$("#gr-"+k).value=GRD[k]);grCalc();});
+  grCalc();
+
+  /* Break-even calculator */
+  const BE=["price","var","fixed","target","market"],BED={price:50,var:10,fixed:60000,target:0,market:40000};
+  function beCalc(){const g=k=>{const v=parseFloat($("#be-"+k).value);return isNaN(v)?0:v;};
+    const c=g("price")-g("var"),note=$("#be-note");
+    if(c<=0){["units","rev","share"].forEach(k=>$("#be-"+k).textContent="–");note.textContent="Price must be above the variable cost, or every sale loses money and there's no break-even.";return;}
+    const u=(g("fixed")+g("target"))/c;$("#be-units").textContent=nf(Math.ceil(u-1e-9));$("#be-rev").textContent="$"+nf(u*g("price"));
+    $("#be-share").textContent=g("market")>0?nf(u/g("market")*100,2)+"%":"–";
+    note.textContent=`Each unit contributes $${nf(c,2)}. Covering $${nf(g("fixed")+g("target"))} takes ${nf(Math.ceil(u-1e-9))} units.`;}
+  BE.forEach(k=>$("#be-"+k).addEventListener("input",beCalc));
+  $("#be-reset").addEventListener("click",()=>{BE.forEach(k=>$("#be-"+k).value=BED[k]);beCalc();});
+  beCalc();
+
+  /* Valuation calculator */
+  const VA=["ebitda","adj","mult","once","debt","cash"],VAD={ebitda:10,adj:-1.5,mult:20,once:0,debt:30,cash:5};
+  function vaCalc(){const g=k=>{const v=parseFloat($("#va-"+k).value);return isNaN(v)?0:v;};
+    const e=g("ebitda")+g("adj"),m=g("mult"),ev=e*m+g("once"),eq=ev-g("debt")+g("cash");
+    $("#va-adjE").textContent=mM(e);$("#va-ev").textContent=mM(ev);$("#va-eq").textContent=mM(eq);
+    $("#va-note").textContent=`At ${nf(m,1)}×, every $1M of yearly EBITDA moves the value by $${nf(m,1)}M. Debt, cash, and one-time items move it $1M for $1M.`;}
+  VA.forEach(k=>$("#va-"+k).addEventListener("input",vaCalc));
+  $("#va-reset").addEventListener("click",()=>{VA.forEach(k=>$("#va-"+k).value=VAD[k]);vaCalc();});
+  vaCalc();
+
+  const DONE_MSG=(r,n)=>`<b>${r} of ${n}.</b> `+(r>=14?"Strong. Do one rep from each topic out loud the night before and you're set.":r>=10?"Good base. Re-read the explanations you missed, then redo that topic's worked example.":"Go topic by topic: read the rules, do the worked example, then retake the test.");
+
+  const TEST=[
+    {q:"3 million × 40 thousand = ?",o:["12 billion","120 million","120 billion","1.2 trillion"],a:2,w:"3 × 40 = 120. Zeros: 6 + 3 = 9. So 120 billion."},
+    {q:"A price rises 20% to $60. What was it before?",o:["$48","$50","$52","$54"],a:1,w:"$60 ÷ 1.2 = $50. Subtracting 20% of $60 gives $48, the trap."},
+    {q:"Sales drop from 400 to 300. What's the percent change?",o:["−25%","−33%","−30%","−100%"],a:0,w:"−100 ÷ 400 = −25%. Getting back to 400 would need +33%."},
+    {q:"A margin goes from 30% to 33%. Which is true?",o:["It's up 3%","It's up 3 points, or 10%","It's up 33%","It's up 30 points"],a:1,w:"3 points on a base of 30 is a 10% increase."},
+    {q:"About how long does it take something growing 9% a year to double?",o:["About 6 years","About 8 years","About 11 years","About 9 years"],a:1,w:"72 ÷ 9 = 8 years."},
+    {q:"$100M grows 10% a year for 2 years. Where does it end?",o:["$120M","$121M","$110M","$200M"],a:1,w:"100 × 1.1 = 110, × 1.1 = 121. Compounding adds the extra $1M."},
+    {q:"Cost $40, price $50. What's the margin?",o:["25%","20%","10%","80%"],a:1,w:"$10 profit ÷ $50 price = 20%. $10 ÷ $40 cost = 25% is the markup."},
+    {q:"Price $12, variable cost $4, fixed costs $80K. Break-even units?",o:["6,667","20,000","10,000","8,000"],a:2,w:"Contribution is $8. $80,000 ÷ $8 = 10,000 units."},
+    {q:"Same business, but you want $40K of profit. How many units?",o:["15,000","13,333","10,000","20,000"],a:0,w:"($80K + $40K) ÷ $8 = 15,000."},
+    {q:"A $300K upgrade saves $75K a year. Payback?",o:["2 years","3 years","4 years","5 years"],a:2,w:"$300K ÷ $75K = 4 years."},
+    {q:"A $50M loss has a 10% chance each year. Expected yearly cost?",o:["$50M","$10M","$5M","$500K"],a:2,w:"$50M × 10% = $5M, like it happening once every 10 years."},
+    {q:"Two steps must both succeed, at 70% and 40%. Chance both succeed?",o:["55%","28%","110%","30%"],a:1,w:"0.7 × 0.4 = 0.28. When all steps must happen, multiply."},
+    {q:"$15M EBITDA at 8×, with $30M debt and $10M cash. What are the shares worth?",o:["$120M","$100M","$90M","$140M"],a:1,w:"$15M × 8 = $120M for the business, − $30M debt + $10M cash = $100M."},
+    {q:"A company valued at 10× loses $3M of EBITDA a year. How much value is lost?",o:["$3M","$13M","$30M","$300M"],a:2,w:"It repeats every year, so $3M × 10 = $30M. A one-time $3M hit would be $3M."},
+    {q:"60% of sales earn a 10% margin and 40% earn a 30% margin. Overall margin?",o:["20%","18%","22%","16%"],a:1,w:"0.6 × 10 + 0.4 × 30 = 6 + 12 = 18%. The simple average, 20%, ignores the mix."},
+    {q:"Which is a bottom-up market estimate?",o:["Population × share who buy × price","Industry sales × our share","Visits to one store a day × stores × price × days","Last year's market × growth"],a:2,w:"Bottom-up starts from one unit, here one store, and scales up."},
+  ];
+  const testq=$("#testq");
+  TEST.forEach((t,n)=>{const d=document.createElement("div");d.className="mc";d.dataset.answer=t.a;d.dataset.group="test";
+    d.innerHTML=`<div class="mc-head"><p class="stem" data-say="Question ${n+1}. ${t.q.replace(/"/g,"&quot;")}"><span class="qn">Q${n+1}</span>${t.q}</p><button class="btn small qlisten" type="button" aria-label="Listen to question ${n+1}">Listen</button></div>
+      <div class="opts">${t.o.map(o=>`<button class="opt" type="button" data-say="${o.replace(/"/g,"&quot;")}">${o}</button>`).join("")}</div>
+      <div class="why" hidden><p data-say="${t.w.replace(/"/g,"&quot;")}">${t.w}</p></div>`;
+    testq.appendChild(d);});
+
+  /* ---------- multiple choice engine ---------- */
+  function setupMC(mc){const opts=$$(".opt",mc);
+    opts.forEach((o,i)=>{if(!o.querySelector(".L")){const x=document.createElement("span");x.className="x";while(o.firstChild)x.appendChild(o.firstChild);
+        const L=document.createElement("span");L.className="L";L.textContent=LET[i];o.append(L,x);
+        o.dataset.say=LET[i]+". "+(o.dataset.say||x.textContent);}
+      o.addEventListener("click",()=>answer(mc,i));});}
+  function answer(mc,i){if(mc.dataset.done)return;mc.dataset.done="1";const a=+mc.dataset.answer,opts=$$(".opt",mc);
+    opts.forEach((o,k)=>{o.disabled=true;if(k===a){o.classList.add("right");o.insertAdjacentHTML("beforeend",`<span class="tag">✓ ${k===i?"Correct":"Answer"}</span>`);}
+      else if(k===i){o.classList.add("wrong");o.insertAdjacentHTML("beforeend",`<span class="tag">✕ Your pick</span>`);}});
+    mc.dataset.correct=String(i===a);$(".why",mc).hidden=false;if(mc.dataset.group==="test")score();}
+  function resetMC(mc){delete mc.dataset.done;delete mc.dataset.correct;$$(".opt",mc).forEach(o=>{o.disabled=false;o.classList.remove("right","wrong");const t=$(".tag",o);if(t)t.remove();});$(".why",mc).hidden=true;}
+  $$(".mc").forEach(setupMC);
+  function score(){const qs=$$('.mc[data-group="test"]'),done=qs.filter(q=>q.dataset.done),right=done.filter(q=>q.dataset.correct==="true").length;
+    $("#score").innerHTML=`${right} / ${done.length}<small>answered ${done.length} of ${qs.length}</small>`;
+    const box=$("#done");if(done.length===qs.length){box.hidden=false;
+      box.innerHTML=typeof DONE_MSG==="function"?DONE_MSG(right,qs.length):`<b>${right} of ${qs.length}.</b> `+(right>=11?"You're ready. Run the recommendation in step 09 out loud once more and get some sleep.":right>=8?"Solid. Re-read the explanations you missed, then run steps 04 and 09 out loud.":"Go back to the primer in step 01, then retake the test. The terms will stick on the second pass.");}
+    else box.hidden=true;}
+  $("#resetTest").addEventListener("click",()=>{$$('.mc[data-group="test"]').forEach(resetMC);score();$("#test").scrollIntoView();});
+  score();
+
+  /* ---------- read aloud, with a voice menu ---------- */
+  const synth=window.speechSynthesis,rateSel=$("#rate"),vSel=$("#voicePick");
+  try{const r=localStorage.getItem(PAGEKEY+"-rate");if(r)rateSel.value=r;}catch(e){}
+  rateSel.addEventListener("change",()=>{try{localStorage.setItem(PAGEKEY+"-rate",rateSel.value);}catch(e){}});
+  let speakingBtn=null,voice=null,voices=[];
+  const vrank=v=>(/natural|neural/i.test(v.name)?0:/premium/i.test(v.name)?1:/enhanced/i.test(v.name)?2:/google/i.test(v.name)?3:4)+(/^en[-_]US/i.test(v.lang)?0:.5);
+  function loadVoices(){
+    if(!synth)return;
+    voices=synth.getVoices().filter(v=>/^en/i.test(v.lang)).sort((a,b)=>vrank(a)-vrank(b)||a.name.localeCompare(b.name));
+    if(!vSel)return;
+    let saved=null;try{saved=localStorage.getItem(PAGEKEY+"-voice");}catch(e){}
+    vSel.innerHTML=voices.length?voices.map((v,i)=>`<option value="${i}">${v.name.replace(/[<>&"]/g,"")}${vrank(v)<2?" (natural)":""}</option>`).join(""):'<option value="">Browser default</option>';
+    let idx=voices.findIndex(v=>v.name===saved);if(idx<0)idx=0;
+    if(voices.length)vSel.value=String(idx);voice=voices[idx]||null;
+  }
+  if(vSel)vSel.addEventListener("change",()=>{voice=voices[+vSel.value]||null;try{localStorage.setItem(PAGEKEY+"-voice",voice?voice.name:"");}catch(e){}});
+  loadVoices();
+  if(synth&&"onvoiceschanged" in synth)synth.addEventListener("voiceschanged",loadVoices);
+  function textOf(el){return(el.getAttribute("data-say")||el.innerText||"").replace(/\s+/g," ").trim();}
+  function visible(el){return!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);}
+  function stop(){if(synth)synth.cancel();if(speakingBtn){speakingBtn.textContent=speakingBtn.dataset.label;speakingBtn.setAttribute("aria-pressed","false");speakingBtn=null;}}
+  function speakChunks(btn,chunks){
+    if(!synth||!chunks.length)return;
+    if(speakingBtn===btn){stop();return;}
+    stop();
+    speakingBtn=btn;btn.dataset.label=btn.dataset.label||btn.textContent;btn.textContent="Stop";btn.setAttribute("aria-pressed","true");
+    chunks.forEach((c,i)=>{const u=new SpeechSynthesisUtterance(c);u.rate=+rateSel.value;if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang="en-US";
+      if(i===chunks.length-1)u.onend=()=>{if(speakingBtn===btn)stop();};synth.speak(u);});
+  }
+  function speak(btn,els){const chunks=[];els.filter(visible).forEach(el=>{textOf(el).split(/(?<=[.?!])\s+(?=[A-Z0-9"“])/).forEach(c=>{if(c)chunks.push(c);});});speakChunks(btn,chunks);}
+  if(!synth){$$(".listen,.qlisten").forEach(b=>b.hidden=true);$(".speed").hidden=true;const vb=$(".voicebar");if(vb)vb.hidden=true;}
+  else{
+    $$(".listen").forEach(b=>{b.dataset.label=b.textContent;b.addEventListener("click",()=>{const sec=b.closest("section");speak(b,$$("[data-say]",sec).filter(el=>!el.parentElement.closest("[data-say]")));});});
+    document.addEventListener("click",e=>{const b=e.target.closest(".qlisten");if(!b)return;const mc=b.closest(".mc");speak(b,$$("[data-say]",mc).filter(el=>!el.parentElement.closest("[data-say]")));});
+    const vt=$("#voiceTest");if(vt){vt.dataset.label=vt.textContent;vt.addEventListener("click",()=>speakChunks(vt,["Hi. This is how I'll read your case.","Pick another voice if this one sounds robotic."]));}
+  }
+  /* ---------- rail highlight ---------- */
+  const chips=$$("#chips a"),map=new Map(chips.map(a=>[a.getAttribute("href").slice(1),a]));
+  if("IntersectionObserver" in window){
+    const io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){chips.forEach(c=>c.classList.remove("on"));const a=map.get(en.target.id);if(a){a.classList.add("on");const p=a.parentElement;p.scrollTo({left:a.offsetLeft-p.clientWidth/2+a.offsetWidth/2,behavior:"smooth"});}}});},{rootMargin:"-45% 0px -50% 0px"});
+    $$("section.step").forEach(s=>io.observe(s));
+  }
+})();
+</script>
+<script src="tts.js"></script>
+<script src="chat.js"></script>
+<script src="glossary.js"></script>
+</body></html>
